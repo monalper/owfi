@@ -15,9 +15,14 @@
   box-sizing: border-box;
 }
 
+@media (max-width: 600px) {
+  .app-main {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (min-width: 768px) {
   .app-main {
     padding: 24px 24px 40px;
   }
 }
-

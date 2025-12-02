@@ -1,108 +1,118 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowUp, FaArrowDown, FaCoins, FaRegGem, FaDollarSign } from 'react-icons/fa';
+import { TbArrowUpRight, TbArrowDownLeft } from 'react-icons/tb';
+import CardChart from '../CardChart/CardChart.jsx';
 import './AssetCard.css';
 
-const formatterPrice = new Intl.NumberFormat('tr-TR', {
+const formatterNumber = new Intl.NumberFormat('tr-TR', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
-const formatterPercent = new Intl.NumberFormat('tr-TR', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-function AssetCard({ symbol, longName, shortName, regularMarketPrice, change, changePercent }) {
+function AssetCard({
+  symbol,
+  longName,
+  shortName,
+  regularMarketPrice,
+  change,
+  changePercent,
+  chartData,
+}) {
   const isPositive = typeof change === 'number' && change >= 0;
   const isNegative = typeof change === 'number' && change < 0;
 
   const upperSymbol = (symbol || '').toUpperCase();
-
   let displaySymbol = upperSymbol.replace(/\.IS$/i, '');
-  if (upperSymbol === 'XAUUSD=X') {
-    displaySymbol = 'Altın';
-  } else if (upperSymbol === 'XAGUSD=X') {
-    displaySymbol = 'Gümüş';
-  }
 
-  const isTurkeyIndex =
-    upperSymbol === 'XU100.IS' || upperSymbol === 'XU050.IS' || upperSymbol === 'XU030.IS';
-  const isAmericaIndex = upperSymbol === 'SPY' || upperSymbol === 'QQQ';
-  const isGold = upperSymbol === 'XAUUSD=X';
-  const isSilver = upperSymbol === 'XAGUSD=X';
-  const isFx = upperSymbol.endsWith('=X') && !isGold && !isSilver;
+  // Döviz pariteleri için özel gösterim
+  if (upperSymbol === 'USDTRY=X') displaySymbol = 'USD/TRY';
+  else if (upperSymbol === 'EURTRY=X') displaySymbol = 'EUR/TRY';
+  else if (upperSymbol === 'EURUSD=X') displaySymbol = 'EUR/USD';
+  // Kıymetli madenler için özel gösterim
+  else if (upperSymbol === 'GC=F') displaySymbol = 'Altın';
+  else if (upperSymbol === 'SI=F') displaySymbol = 'Gümüş';
 
-  let avatarIconSrc = null;
-  if (isTurkeyIndex) {
-    avatarIconSrc = '/cardicon/turkey.png';
-  } else if (isAmericaIndex) {
-    avatarIconSrc = '/cardicon/america.png';
-  }
+  const isTurkeyIndex = upperSymbol.includes('.IS') || upperSymbol.startsWith('XU');
 
-  let AvatarIcon = null;
-  if (isGold) {
-    AvatarIcon = FaCoins;
-  } else if (isSilver) {
-    AvatarIcon = FaRegGem;
-  } else if (isFx) {
-    AvatarIcon = FaDollarSign;
-  }
+  const isUsd =
+    upperSymbol === 'SPY' ||
+    upperSymbol === 'QQQ' ||
+    upperSymbol === 'GC=F' ||
+    upperSymbol === 'SI=F' ||
+    (!upperSymbol.includes('.IS') && !upperSymbol.includes('=X'));
 
-  const avatarClassNames = ['asset-card-avatar'];
-  if (isGold) avatarClassNames.push('asset-card-avatar-gold');
-  if (isSilver) avatarClassNames.push('asset-card-avatar-silver');
-  if (isFx) avatarClassNames.push('asset-card-avatar-fx');
+  let currencySymbol = '';
+  if (isTurkeyIndex) currencySymbol = '₺';
+  else if (isUsd) currencySymbol = '$';
 
   const textChangePercent =
     typeof changePercent === 'number'
-      ? formatterPercent.format(Math.abs(changePercent))
+      ? formatterNumber.format(Math.abs(changePercent))
       : null;
+
+  let priceMain = '?';
+  let priceDecimal = null;
+
+  if (typeof regularMarketPrice === 'number') {
+    const formatted = formatterNumber.format(regularMarketPrice);
+    const parts = formatted.split(',');
+    priceMain = parts[0];
+    if (parts.length > 1) priceDecimal = parts[1];
+  }
 
   return (
     <Link to={`/asset/${encodeURIComponent(symbol)}`} className="asset-card-root">
-      <div className={avatarClassNames.join(' ')}>
-        {avatarIconSrc ? (
-          <img src={avatarIconSrc} alt="" className="asset-card-avatar-img" />
-        ) : AvatarIcon ? (
-          <AvatarIcon className="asset-card-avatar-icon" />
-        ) : (
-          <span>{symbol?.[0] ?? '?'}</span>
-        )}
-      </div>
-      <div className="asset-card-content">
-        <div className="asset-card-row asset-card-row-top">
+      <div className="asset-card-content-wrapper">
+        <div className="asset-card-header">
           <div className="asset-card-symbol">{displaySymbol}</div>
-          <div className="asset-card-price">
-            {typeof regularMarketPrice === 'number'
-              ? formatterPrice.format(regularMarketPrice)
-              : '—'}
-          </div>
-        </div>
-        <div className="asset-card-row asset-card-row-bottom">
           <div className="asset-card-name">{longName || shortName}</div>
+        </div>
+
+        <div className="asset-card-body">
+          <div className="asset-card-price">
+            <span className="price-main">{priceMain}</span>
+            {priceDecimal && (
+              <span className="price-decimal">,{priceDecimal}</span>
+            )}
+            {currencySymbol && (
+              <span className="currency-symbol">{currencySymbol}</span>
+            )}
+          </div>
+
           <div className="asset-card-change">
             {isPositive && (
               <>
-                <FaArrowUp className="asset-card-change-icon asset-card-change-icon-positive" />
-                <span className="asset-card-change-text asset-card-change-text-positive">
+                <TbArrowUpRight className="asset-card-change-icon positive" />
+                <span className="asset-card-change-text positive">
                   %{textChangePercent}
                 </span>
               </>
             )}
             {isNegative && (
               <>
-                <FaArrowDown className="asset-card-change-icon asset-card-change-icon-negative" />
-                <span className="asset-card-change-text asset-card-change-text-negative">
+                <TbArrowDownLeft className="asset-card-change-icon negative" />
+                <span className="asset-card-change-text negative">
                   %{textChangePercent}
                 </span>
               </>
             )}
             {!isPositive && !isNegative && (
-              <span className="asset-card-change-text asset-card-change-text-muted">—</span>
+              <span className="asset-card-change-text muted">--</span>
             )}
           </div>
         </div>
+      </div>
+
+      <div className="asset-card-chart-container">
+        {Array.isArray(chartData) && chartData.length > 0 ? (
+          <CardChart
+            data={chartData}
+            color={isPositive ? '#30d158' : isNegative ? '#ff453a' : '#888'}
+            chartId={symbol}
+          />
+        ) : (
+          <div className="chart-placeholder" />
+        )}
       </div>
     </Link>
   );

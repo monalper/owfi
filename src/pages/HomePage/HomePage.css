@@ -41,14 +41,16 @@
 
 .home-group-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 26px 0 14px;
 }
 
 .home-group-title {
   margin: 0;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .home-group-description {
@@ -59,8 +61,8 @@
 }
 
 .home-group-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -95,10 +97,15 @@
     max-width: 420px;
   }
 
+  .home-group-header {
+    justify-content: flex-start;
+    align-items: flex-end;
+    text-align: left;
+    margin: 20px 0 14px;
+  }
+
   .home-group-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
   }
 }
-

@@ -3,6 +3,22 @@ const API_BASE = '/api/yahoo';
 
 const cache = new Map();
 
+// Aralık ayarlarını biraz daha hassaslaştırdık (Örn: 1G için 2m)
+const RANGE_PARAMS = {
+  '1G': { range: '1d', interval: '2m' },   // Daha detaylı gün içi grafik
+  '1H': { range: '5d', interval: '15m' },  // 1 Hafta (5 iş günü)
+  '1A': { range: '1mo', interval: '60m' }, // 1 Ay için saatlik veri
+  '3A': { range: '3mo', interval: '1d' },
+  '6A': { range: '6mo', interval: '1d' },
+  '1Y': { range: '1y', interval: '1d' },
+  '5Y': { range: '5y', interval: '1wk' },
+  MAX: { range: 'max', interval: '1mo' },
+};
+
+function resolveRangeParams(rangeKey) {
+  return RANGE_PARAMS[rangeKey] || RANGE_PARAMS['1G'];
+}
+
 async function fetchWithCache(url) {
   const now = Date.now();
   const cached = cache.get(url);
@@ -97,18 +113,7 @@ export async function fetchQuotes(symbols) {
 }
 
 export async function fetchChart(symbol, rangeKey) {
-  const paramsByRange = {
-    '1G': { range: '1d', interval: '5m' },
-    '1H': { range: '5d', interval: '30m' },
-    '1A': { range: '1mo', interval: '1d' },
-    '3A': { range: '3mo', interval: '1d' },
-    '6A': { range: '6mo', interval: '1d' },
-    '1Y': { range: '1y', interval: '1d' },
-    '5Y': { range: '5y', interval: '1wk' },
-    MAX: { range: 'max', interval: '1mo' },
-  };
-
-  const params = paramsByRange[rangeKey] || paramsByRange['1G'];
+  const params = resolveRangeParams(rangeKey);
 
   const url = `${API_BASE}/v8/finance/chart/${encodeURIComponent(
     symbol,
@@ -121,6 +126,7 @@ export async function fetchChart(symbol, rangeKey) {
     return [];
   }
 
+  const meta = result.meta || {};
   const timestamps = result.timestamp || [];
   const quotes = result.indicators?.quote?.[0] || {};
   const closes = quotes.close || [];
@@ -129,10 +135,35 @@ export async function fetchChart(symbol, rangeKey) {
     return [];
   }
 
-  const firstClose = closes.find((value) => typeof value === 'number');
+  // Veri setindeki ilk geçerli fiyat (null olmayan)
+  const firstDataPoint = closes.find((value) => typeof value === 'number');
 
-  if (!firstClose) {
+  if (typeof firstDataPoint !== 'number') {
     return [];
+  }
+
+  // REFERANS FİYAT BELİRLEME (CRITICAL FIX)
+  // 1G (Günlük) grafiklerde referans "Dünkü Kapanış" olmalıdır.
+  // Diğerlerinde (1A, 1Y vs.) referans "İlk Veri Noktası"dır.
+  let referencePrice;
+
+  if (rangeKey === '1G') {
+    // chartPreviousClose genellikle en doğru veridir
+    if (typeof meta.chartPreviousClose === 'number') {
+      referencePrice = meta.chartPreviousClose;
+    } else if (typeof meta.previousClose === 'number') {
+      referencePrice = meta.previousClose;
+    } else {
+      referencePrice = firstDataPoint;
+    }
+  } else {
+    // Uzun vadeli grafiklerde başlangıç noktası referanstır
+    referencePrice = firstDataPoint;
+  }
+
+  // Güvenlik: Sıfıra bölünme hatasını önle
+  if (!referencePrice || referencePrice === 0) {
+    referencePrice = firstDataPoint;
   }
 
   const points = [];
@@ -140,12 +171,12 @@ export async function fetchChart(symbol, rangeKey) {
   for (let i = 0; i < timestamps.length; i += 1) {
     const price = closes[i];
     if (typeof price !== 'number') {
-      // Skip boş veri
       // eslint-disable-next-line no-continue
       continue;
     }
 
-    const changePct = ((price - firstClose) / firstClose) * 100;
+    // Yüzdelik değişimi referans fiyata göre hesapla
+    const changePct = ((price - referencePrice) / referencePrice) * 100;
 
     points.push({
       time: new Date(timestamps[i] * 1000),
@@ -155,6 +186,61 @@ export async function fetchChart(symbol, rangeKey) {
   }
 
   return points;
+}
+
+export async function fetchRangeStats(symbol, rangeKey) {
+  if (!symbol || !rangeKey || rangeKey === '1G') {
+    return null;
+  }
+
+  const params = resolveRangeParams(rangeKey);
+
+  const url = `${API_BASE}/v8/finance/spark?symbols=${encodeURIComponent(
+    symbol,
+  )}&range=${params.range}&interval=${params.interval}&lang=tr-TR&region=TR`;
+
+  const json = await fetchWithCache(url);
+
+  if (!json || typeof json !== 'object') {
+    return null;
+  }
+
+  let series = json[symbol];
+
+  if (!series) {
+    const upper = symbol.toUpperCase();
+    series = json[upper];
+  }
+
+  if (!series) {
+    const values = Object.values(json);
+    series = values[0];
+  }
+
+  if (!series || !Array.isArray(series.close) || series.close.length === 0) {
+    return null;
+  }
+
+  const closes = series.close;
+
+  const firstClose = closes.find((value) => typeof value === 'number');
+  const lastClose = [...closes]
+    .reverse()
+    .find((value) => typeof value === 'number');
+
+  if (typeof firstClose !== 'number' || typeof lastClose !== 'number') {
+    return null;
+  }
+
+  const change = lastClose - firstClose;
+  const changePercent =
+    firstClose !== 0 ? (change / firstClose) * 100 : 0;
+
+  return {
+    lastPrice: lastClose,
+    change,
+    changePercent,
+  };
 }
 
 export async function searchSymbols(query) {

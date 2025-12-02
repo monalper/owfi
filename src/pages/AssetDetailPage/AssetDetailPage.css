@@ -62,8 +62,8 @@
 }
 
 .asset-detail-change-icon {
-  width: 12px;
-  height: 12px;
+  width: 18px;
+  height: 18px;
 }
 
 .asset-detail-change-value-positive,
@@ -73,7 +73,7 @@
 
 .asset-detail-change-value-negative,
 .asset-detail-change-icon-negative {
-  color: #ff3b30;
+  color: #FF6057;
 }
 
 .asset-detail-change-muted {
@@ -203,6 +203,45 @@
   color: #e3e3e3;
 }
 
+/* Related assets */
+.asset-detail-related {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-detail-related-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-detail-related-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.asset-detail-related-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.asset-detail-related-list > * {
+  flex: 0 0 75%;
+}
+
+.asset-detail-related-loading {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #e3e3e3;
+}
+
 /* DESKTOP düzenlemeleri */
 @media (min-width: 768px) {
   .asset-detail-root {
@@ -236,5 +275,18 @@
 
   .asset-detail-metrics-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .asset-detail-related-list {
+    display: grid;
+    flex-wrap: unset;
+    overflow-x: visible;
+    padding-bottom: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .asset-detail-related-list > * {
+    flex: initial;
   }
 }

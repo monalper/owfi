@@ -1,8 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaArrowUp, FaArrowDown } from 'react-icons/fa';
-import { fetchChart, fetchQuotes } from '../../api/yahooClient.js';
+import { TbArrowUpRight, TbArrowDownLeft } from 'react-icons/tb';
+import { fetchChart, fetchQuotes, fetchRangeStats } from '../../api/yahooClient.js';
+import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
 import AssetChart from '../../components/AssetChart/AssetChart.jsx';
+import AssetCard from '../../components/AssetCard/AssetCard.jsx';
 import TimeRangeToggle from '../../components/TimeRangeToggle/TimeRangeToggle.jsx';
 import './AssetDetailPage.css';
 
@@ -16,12 +18,162 @@ const percentFormatter = new Intl.NumberFormat('tr-TR', {
   maximumFractionDigits: 2,
 });
 
+function RelatedAssetsSection({ symbol }) {
+  const [quotes, setQuotes] = useState({});
+  const [charts, setCharts] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  const relatedSymbols = useMemo(() => {
+    if (!symbol) return [];
+
+    const upper = symbol.toUpperCase();
+
+    const directGroup = WATCHLIST_GROUPS.find((group) =>
+      group.symbols.some((s) => s.toUpperCase() === upper),
+    );
+
+    if (directGroup) {
+      return directGroup.symbols.filter((s) => s.toUpperCase() !== upper);
+    }
+
+    const isBist = upper.endsWith('.IS') || upper.startsWith('XU');
+    const isFx =
+      upper.includes('=X') && upper !== 'GC=F' && upper !== 'SI=F';
+    const isCommodity =
+      upper === 'GC=F' ||
+      upper === 'SI=F' ||
+      upper === 'XAUUSD=X' ||
+      upper === 'XAGUSD=X';
+    const isUs = !isBist && !isFx && !isCommodity;
+
+    let fallbackId = null;
+    if (isBist) fallbackId = 'equities';
+    else if (isFx) fallbackId = 'fx';
+    else if (isCommodity) fallbackId = 'commodities';
+    else if (isUs) fallbackId = 'us-companies';
+
+    if (!fallbackId) return [];
+
+    const fallbackGroup = WATCHLIST_GROUPS.find(
+      (group) => group.id === fallbackId,
+    );
+
+    if (!fallbackGroup) return [];
+
+    return fallbackGroup.symbols.filter((s) => s.toUpperCase() !== upper);
+  }, [symbol]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRelated() {
+      if (!relatedSymbols.length) {
+        setQuotes({});
+        setCharts({});
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        const quotesArray = await fetchQuotes(relatedSymbols);
+        if (cancelled) return;
+
+        const bySymbol = {};
+        quotesArray.forEach((item) => {
+          if (item && item.symbol) {
+            bySymbol[item.symbol] = item;
+          }
+        });
+        setQuotes(bySymbol);
+
+        const chartEntries = await Promise.all(
+          relatedSymbols.map(async (relatedSymbol) => {
+            try {
+              const data = await fetchChart(relatedSymbol, '1G');
+              return [relatedSymbol, data];
+            } catch {
+              return [relatedSymbol, []];
+            }
+          }),
+        );
+
+        if (cancelled) return;
+
+        const chartsBySymbol = {};
+        chartEntries.forEach(([relatedSymbol, data]) => {
+          chartsBySymbol[relatedSymbol] = data;
+        });
+        setCharts(chartsBySymbol);
+      } catch (err) {
+        if (!cancelled) {
+          // sessizce yut, ana hata mesajlarını bozma
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadRelated();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [relatedSymbols]);
+
+  if (!relatedSymbols.length) {
+    return null;
+  }
+
+  return (
+    <section className="asset-detail-related">
+      <div className="asset-detail-related-header">
+        <h2 className="asset-detail-related-title"></h2>
+      </div>
+      <div className="asset-detail-related-list">
+        {relatedSymbols.map((relatedSymbol) => {
+          const directQuote = quotes[relatedSymbol];
+          const normalizedQuote =
+            directQuote ||
+            Object.values(quotes).find(
+              (item) =>
+                item?.symbol &&
+                item.symbol.toUpperCase() === relatedSymbol.toUpperCase(),
+            );
+          const chartDataForSymbol = charts[relatedSymbol];
+
+          return (
+            <AssetCard
+              key={relatedSymbol}
+              symbol={relatedSymbol}
+              longName={normalizedQuote?.longName}
+              shortName={normalizedQuote?.shortName}
+              regularMarketPrice={normalizedQuote?.regularMarketPrice}
+              change={normalizedQuote?.regularMarketChange}
+              changePercent={normalizedQuote?.regularMarketChangePercent}
+              chartData={chartDataForSymbol}
+            />
+          );
+        })}
+      </div>
+      {loading && (
+        <div className="asset-detail-related-loading">
+          <span>İlişkili hisseler yükleniyor…</span>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function AssetDetailPage() {
   const { symbol } = useParams();
 
   const [rangeKey, setRangeKey] = useState('1G');
   const [quote, setQuote] = useState(null);
   const [chartData, setChartData] = useState([]);
+  const [rangeStats, setRangeStats] = useState(null);
   const [loadingQuote, setLoadingQuote] = useState(true);
   const [loadingChart, setLoadingChart] = useState(true);
   const [error, setError] = useState(null);
@@ -119,6 +271,36 @@ function AssetDetailPage() {
     };
   }, [symbol, rangeKey]);
 
+  // Seçilen tarih aralığına göre ilk/son fiyat ve yüzde değişimini hesapla
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadRangeStats() {
+      if (!symbol) return;
+
+      if (rangeKey === '1G') {
+        setRangeStats(null);
+        return;
+      }
+
+      try {
+        const stats = await fetchRangeStats(symbol, rangeKey);
+        if (cancelled) return;
+        setRangeStats(stats);
+      } catch (e) {
+        if (!cancelled) {
+          setRangeStats(null);
+        }
+      }
+    }
+
+    loadRangeStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol, rangeKey]);
+
   const rawSymbol = symbol || '';
   const upperSymbol = rawSymbol.toUpperCase();
 
@@ -129,8 +311,58 @@ function AssetDetailPage() {
     displaySymbol = 'Gümüş';
   }
 
-  const change = quote?.regularMarketChange;
-  const changePercent = quote?.regularMarketChangePercent;
+  // Header fiyat/değişim: her zaman günlük (Yahoo header ile aynı)
+  const isDailyRange = rangeKey === '1G';
+
+  // 1G: Yahoo'nun günlük değişimini kullan
+  // Diğer aralıklar: chartData'dan hesaplanan değişimi kullan (fallback: günlük)
+  const displayPrice = (() => {
+    if (isDailyRange) {
+      return typeof quote?.regularMarketPrice === 'number'
+        ? quote.regularMarketPrice
+        : null;
+    }
+
+    if (typeof rangeStats?.lastPrice === 'number') {
+      return rangeStats.lastPrice;
+    }
+
+    return typeof quote?.regularMarketPrice === 'number'
+      ? quote.regularMarketPrice
+      : null;
+  })();
+
+  const change = (() => {
+    if (isDailyRange) {
+      return typeof quote?.regularMarketChange === 'number'
+        ? quote.regularMarketChange
+        : null;
+    }
+
+    if (typeof rangeStats?.change === 'number') {
+      return rangeStats.change;
+    }
+
+    return typeof quote?.regularMarketChange === 'number'
+      ? quote.regularMarketChange
+      : null;
+  })();
+
+  const changePercent = (() => {
+    if (isDailyRange) {
+      return typeof quote?.regularMarketChangePercent === 'number'
+        ? quote.regularMarketChangePercent
+        : null;
+    }
+
+    if (typeof rangeStats?.changePercent === 'number') {
+      return rangeStats.changePercent;
+    }
+
+    return typeof quote?.regularMarketChangePercent === 'number'
+      ? quote.regularMarketChangePercent
+      : null;
+  })();
 
   const isPositive = typeof change === 'number' && change >= 0;
   const isNegative = typeof change === 'number' && change < 0;
@@ -198,14 +430,14 @@ function AssetDetailPage() {
         </div>
         <div className="asset-detail-price-block">
           <div className="asset-detail-price">
-            {typeof quote?.regularMarketPrice === 'number'
-              ? priceFormatter.format(quote.regularMarketPrice)
+            {typeof displayPrice === 'number'
+              ? priceFormatter.format(displayPrice)
               : '—'}
           </div>
           <div className="asset-detail-change-row">
             {isPositive && (
               <>
-                <FaArrowUp className="asset-detail-change-icon asset-detail-change-icon-positive" />
+                <TbArrowUpRight className="asset-detail-change-icon asset-detail-change-icon-positive" />
                 <span className="asset-detail-change-value asset-detail-change-value-positive">
                   {priceFormatter.format(Math.abs(change))}
                 </span>
@@ -216,7 +448,7 @@ function AssetDetailPage() {
             )}
             {isNegative && (
               <>
-                <FaArrowDown className="asset-detail-change-icon asset-detail-change-icon-negative" />
+                <TbArrowDownLeft className="asset-detail-change-icon asset-detail-change-icon-negative" />
                 <span className="asset-detail-change-value asset-detail-change-value-negative">
                   {priceFormatter.format(Math.abs(change))}
                 </span>
@@ -252,7 +484,7 @@ function AssetDetailPage() {
 
       <section className="asset-detail-metrics">
         <div className="asset-detail-metrics-header">
-          <h2 className="asset-detail-metrics-title">Özet Bilgiler</h2>
+          <h2 className="asset-detail-metrics-title"></h2>
         </div>
 
         {/* Tab navbar */}
@@ -286,6 +518,8 @@ function AssetDetailPage() {
           ))}
         </div>
       </section>
+
+      <RelatedAssetsSection symbol={symbol} />
 
       {loadingQuote && (
         <div className="asset-detail-loading">

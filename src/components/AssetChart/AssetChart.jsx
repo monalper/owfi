@@ -15,8 +15,52 @@ const percentFormatter = new Intl.NumberFormat('tr-TR', {
   maximumFractionDigits: 2,
 });
 
+const dateFormatter = new Intl.DateTimeFormat('tr-TR', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
 const greenColor = '#4cd964';
 const redColor = '#ff3b30';
+
+// Özelleştirilmiş Tooltip Bileşeni
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const isPositive = data.changePct >= 0;
+
+    return (
+      <div className="custom-tooltip">
+        {/* Tarih ve Saat */}
+        <div className="tooltip-date">
+          {dateFormatter.format(new Date(label))}
+        </div>
+        
+        {/* Fiyat ve Değişim Oranı */}
+        <div className="tooltip-row">
+          <div className="tooltip-item">
+            <span className="tooltip-label">Fiyat:</span>
+            <span className="tooltip-value">{data.price}</span>
+          </div>
+          
+          <div className="tooltip-item">
+            <span className="tooltip-label">Değişim:</span>
+            <span 
+              className="tooltip-value" 
+              style={{ color: isPositive ? greenColor : redColor }}
+            >
+              %{percentFormatter.format(data.changePct)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 function AssetChart({ data }) {
   if (!data || data.length === 0) {
@@ -31,22 +75,15 @@ function AssetChart({ data }) {
   const isPositive = lastPoint.changePct >= 0;
   const strokeColor = isPositive ? greenColor : redColor;
 
-  // Min ve Max değerleri
   const minValue = Math.min(...data.map((point) => point.changePct));
   const maxValue = Math.max(...data.map((point) => point.changePct));
-  
-  // Padding (%10 boşluk)
   const padding = (maxValue - minValue) * 0.1;
 
-  // 0 Noktasının (Zero Line) grafikteki yüzdelik konumunu hesapla
-  // Bu, rengi tam 0 noktasında kesmek için gereklidir.
   const getGradientOffset = () => {
     const dataMax = maxValue + padding;
     const dataMin = minValue - padding;
-
     if (dataMax <= 0) return 0;
     if (dataMin >= 0) return 1;
-
     return dataMax / (dataMax - dataMin);
   };
 
@@ -62,24 +99,16 @@ function AssetChart({ data }) {
           <defs>
             <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
               {isPositive ? (
-                /* DURUM 1: SONUÇ POZİTİF (YEŞİL) */
                 <>
-                  {/* 0'ın Üstü (Pozitif Alan): Yeşilden Şeffafa azalır */}
                   <stop offset="0%" stopColor={greenColor} stopOpacity={0.5} />
                   <stop offset={off} stopColor={greenColor} stopOpacity={0} />
-                  
-                  {/* 0'ın Altı (Negatif Alan): Tamamen Şeffaf (Görünmez) */}
                   <stop offset={off} stopColor={greenColor} stopOpacity={0} />
                   <stop offset="100%" stopColor={greenColor} stopOpacity={0} />
                 </>
               ) : (
-                /* DURUM 2: SONUÇ NEGATİF (KIRMIZI) */
                 <>
-                  {/* 0'ın Üstü (Pozitif Alan): Tamamen Şeffaf (Görünmez) */}
                   <stop offset="0%" stopColor={redColor} stopOpacity={0} />
                   <stop offset={off} stopColor={redColor} stopOpacity={0} />
-                  
-                  {/* 0'ın Altı (Negatif Alan): Şeffaftan Kırmızıya koyulaşır (Ters Gradient) */}
                   <stop offset={off} stopColor={redColor} stopOpacity={0} />
                   <stop offset="100%" stopColor={redColor} stopOpacity={0.5} />
                 </>
@@ -87,47 +116,20 @@ function AssetChart({ data }) {
             </linearGradient>
           </defs>
 
-          <XAxis 
-            dataKey="time" 
-            hide 
-          />
-          <YAxis 
-            // Domain'i padding'li değerlere göre ayarlıyoruz
-            domain={[minValue - padding, maxValue + padding]} 
-            hide 
-          />
+          <XAxis dataKey="time" hide />
+          <YAxis domain={[minValue - padding, maxValue + padding]} hide />
 
           <Tooltip
-            contentStyle={{
-              backgroundColor: '#2b2b2b',
-              borderRadius: 12,
-              border: 'none',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
-            }}
-            itemStyle={{ color: '#fff' }}
-            labelStyle={{ color: '#e3e3e3', marginBottom: '0.5rem' }}
-            formatter={(value, name) => {
-              if (name === 'changePct') return [`${percentFormatter.format(value)}%`, 'Değişim'];
-              if (name === 'price') return [value, 'Fiyat'];
-              return [value, name];
-            }}
-            labelFormatter={(label) =>
-              label instanceof Date
-                ? label.toLocaleString('tr-TR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })
-                : ''
-            }
-            cursor={{ stroke: '#e3e3e3', strokeWidth: 1, strokeDasharray: '3 3' }}
+            content={<CustomTooltip />}
+            cursor={{ stroke: '#e3e3e3', strokeWidth: 1, strokeDasharray: '7 7' }}
+            // Recharts wrapper focus sorununu engellemek için ek ayar
+            wrapperStyle={{ outline: 'none' }}
           />
 
           <ReferenceLine 
             y={0} 
             stroke="#e3e3e3" 
-            strokeDasharray="3 3" 
+            strokeDasharray="7 7" 
             strokeOpacity={0.5} 
           />
 

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="565" height="565" viewBox="0 0 565 565">
+  <defs>
+    <clipPath id="clip-nasdaq">
+      <rect width="565" height="565"/>
+    </clipPath>
+  </defs>
+  <g id="nasdaq" clip-path="url(#clip-nasdaq)">
+    <rect width="565" height="565" fill="#1e1e20"/>
+    <g id="NASDAQ_Logo" transform="translate(68.012 99.984)">
+      <g id="Group_2" data-name="Group 2" transform="translate(215.058 0.016)">
+        <path id="Path_3" data-name="Path 3" d="M111.372.016,16.081,261.822A18.277,18.277,0,0,1,.758,273.731v.125H101.491a18.224,18.224,0,0,0,17.151-12.026L213.967.016Z" transform="translate(-0.758 -0.016)" fill="#fff"/>
+      </g>
+      <path id="Path_4" data-name="Path 4" d="M56.793,185.788a17.249,17.249,0,0,0,14.088-7.3,18.543,18.543,0,0,0,2.278-4.24L108.111,78.17,87.664,22.062a17.276,17.276,0,0,0-30.02-3.322,19.437,19.437,0,0,0-2.278,4.24L20.414,119.022l20.539,56.334a17.251,17.251,0,0,0,15.84,10.432" transform="translate(150.044 84.096)" fill="#fff"/>
+      <g id="Group_3" data-name="Group 3" transform="translate(-0.012 91.552)">
+        <path id="Path_5" data-name="Path 5" d="M215.307.984H113.464A18.262,18.262,0,0,0,96.28,13.019L.988,274.824H103.582l95.3-261.8a18.252,18.252,0,0,1,16.424-12.01Z" transform="translate(-0.988 -0.984)" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+</svg>

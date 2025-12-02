@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
-import { fetchQuotes } from '../../api/yahooClient.js';
+import { fetchQuotes, fetchChart } from '../../api/yahooClient.js';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
 import './HomePage.css';
 
 function HomePage() {
   const [quotes, setQuotes] = useState({});
+  const [charts, setCharts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -43,6 +44,39 @@ function HomePage() {
     };
   }, [allSymbols]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCharts() {
+      const entries = await Promise.all(
+        allSymbols.map(async (symbol) => {
+          try {
+            const data = await fetchChart(symbol, '1G');
+            return [symbol, data];
+          } catch {
+            return [symbol, []];
+          }
+        }),
+      );
+
+      if (cancelled) return;
+
+      const bySymbol = {};
+      entries.forEach(([symbol, data]) => {
+        bySymbol[symbol] = data;
+      });
+      setCharts(bySymbol);
+    }
+
+    if (allSymbols.length > 0) {
+      loadCharts();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [allSymbols]);
+
   return (
     <div className="home-root">
       {error && (
@@ -53,14 +87,15 @@ function HomePage() {
 
       {WATCHLIST_GROUPS.map((group) => (
         <section key={group.id} className="home-group">
-          <header className="home-group-header">
-            <div>
+          {group.title && (
+            <header className="home-group-header">
               <h2 className="home-group-title">{group.title}</h2>
-            </div>
-          </header>
+            </header>
+          )}
           <div className="home-group-list">
             {group.symbols.map((symbol) => {
               const quote = quotes[symbol];
+              const chartData = charts[symbol];
               return (
                 <AssetCard
                   key={symbol}
@@ -70,6 +105,7 @@ function HomePage() {
                   regularMarketPrice={quote?.regularMarketPrice}
                   change={quote?.regularMarketChange}
                   changePercent={quote?.regularMarketChangePercent}
+                  chartData={chartData}
                 />
               );
             })}
