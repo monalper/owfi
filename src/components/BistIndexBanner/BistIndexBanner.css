@@ -1,0 +1,100 @@
+.bist-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  padding: 6px 16px 8px;
+  background: rgba(29, 29, 31, 0.96);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.22s ease-out, opacity 0.22s ease-out;
+}
+
+.bist-banner::after {
+  content: '';
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  border-bottom: 2px solid #ffffff2f;
+}
+
+.bist-banner--visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bist-banner--hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bist-banner__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bist-banner__item {
+  flex: 1;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bist-banner__label {
+  font-size: 11px;
+  color: #e3e3e3;
+  opacity: 0.85;
+}
+
+.bist-banner__change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.bist-banner__separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  font-size: 12px;
+  line-height: 1;
+  color: rgba(227, 227, 227, 0.65);
+}
+
+.bist-banner__icon {
+  width: 14px;
+  height: 14px;
+}
+
+.bist-banner__icon--positive,
+.bist-banner__change-text--positive {
+  color: #30d158;
+}
+
+.bist-banner__icon--negative,
+.bist-banner__change-text--negative {
+  color: #FF6057;
+}
+
+.bist-banner__change-text--muted {
+  color: #a0a0a0;
+}
+
+@media (min-width: 768px) {
+  .bist-banner {
+    display: none;
+  }
+}

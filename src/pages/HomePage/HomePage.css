@@ -41,10 +41,10 @@
 
 .home-group-header {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin: 26px 0 14px;
+  justify-content: flex-start;
+  align-items: flex-end;
+  text-align: left;
+  margin: 20px 0 14px;
 }
 
 .home-group-title {
@@ -61,9 +61,17 @@
 }
 
 .home-group-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.home-group-list > * {
+  flex: 0 0 75%;
 }
 
 .home-loading,
@@ -105,7 +113,15 @@
   }
 
   .home-group-list {
+    display: grid;
+    flex-wrap: unset;
+    overflow-x: visible;
+    padding-bottom: 0;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
+  }
+
+  .home-group-list > * {
+    flex: initial;
   }
 }

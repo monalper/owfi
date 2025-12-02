@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
 import { fetchQuotes, fetchChart } from '../../api/yahooClient.js';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
+import BistIndexBanner from '../../components/BistIndexBanner/BistIndexBanner.jsx';
 import './HomePage.css';
 
 function HomePage() {
@@ -9,6 +10,7 @@ function HomePage() {
   const [charts, setCharts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showMobileBanner, setShowMobileBanner] = useState(false);
 
   const allSymbols = useMemo(
     () => [...new Set(WATCHLIST_GROUPS.flatMap((group) => group.symbols))],
@@ -45,6 +47,30 @@ function HomePage() {
   }, [allSymbols]);
 
   useEffect(() => {
+    function handleScrollOrResize() {
+      if (typeof window === 'undefined') return;
+      const isMobile = window.innerWidth <= 768;
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+
+      const shouldShow = isMobile && scrollY > 80;
+
+      setShowMobileBanner((prev) =>
+        prev === shouldShow ? prev : shouldShow,
+      );
+    }
+
+    handleScrollOrResize();
+
+    window.addEventListener('scroll', handleScrollOrResize, { passive: true });
+    window.addEventListener('resize', handleScrollOrResize);
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     async function loadCharts() {
@@ -79,6 +105,8 @@ function HomePage() {
 
   return (
     <div className="home-root">
+      <BistIndexBanner quotes={quotes} active={showMobileBanner && !loading} />
+
       {error && (
         <div className="home-error">
           <span>{error}</span>
@@ -123,4 +151,3 @@ function HomePage() {
 }
 
 export default HomePage;
-
