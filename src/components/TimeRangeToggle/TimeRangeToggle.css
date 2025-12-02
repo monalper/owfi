@@ -1,0 +1,38 @@
+.time-toggle-root {
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background-color: #2b2b2b;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.time-toggle-item {
+  border: none;
+  outline: none;
+  padding: 8px 0;
+  border-radius: 999px;
+  background-color: transparent;
+  color: #e3e3e3;
+  font-size: 13px;
+  cursor: pointer;
+  flex: 1;
+  text-align: center;
+}
+
+.time-toggle-item-active {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+}
+
+@media (min-width: 768px) {
+  .time-toggle-root {
+    width: auto;
+  }
+
+  .time-toggle-item {
+    flex: 0;
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+}

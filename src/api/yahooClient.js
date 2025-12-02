@@ -1,0 +1,171 @@
+const CACHE_TTL_MS = 60 * 1000;
+const API_BASE = '/api/yahoo';
+
+const cache = new Map();
+
+async function fetchWithCache(url) {
+  const now = Date.now();
+  const cached = cache.get(url);
+
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Yahoo Finance isteği başarısız: ${response.status}`);
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+
+  if (!contentType.includes('application/json')) {
+    const text = await response.text();
+    const preview = text.slice(0, 120);
+    throw new Error(
+      `Yahoo Finance JSON yerine farklı bir içerik döndü (content-type: ${contentType}, preview: ${preview})`,
+    );
+  }
+
+  const data = await response.json();
+  cache.set(url, { timestamp: now, data });
+
+  return data;
+}
+
+export async function fetchQuotes(symbols) {
+  const cleanSymbols = symbols.filter(Boolean);
+  const results = await Promise.all(
+    cleanSymbols.map(async (symbol) => {
+      try {
+        const url = `${API_BASE}/v8/finance/chart/${encodeURIComponent(
+          symbol,
+        )}?range=1d&interval=1d&lang=tr-TR&region=TR`;
+        const json = await fetchWithCache(url);
+        const chartResult = json?.chart?.result?.[0];
+
+        if (!chartResult) return null;
+
+        const meta = chartResult.meta || {};
+        const price = meta.regularMarketPrice;
+        const previousClose =
+          typeof meta.previousClose === 'number'
+            ? meta.previousClose
+            : meta.chartPreviousClose;
+
+        let change = null;
+        let changePercent = null;
+
+        if (
+          typeof price === 'number' &&
+          typeof previousClose === 'number' &&
+          previousClose !== 0
+        ) {
+          change = price - previousClose;
+          changePercent = (change / previousClose) * 100;
+        }
+
+        return {
+          symbol: meta.symbol || symbol,
+          longName: meta.longName,
+          shortName: meta.shortName,
+          regularMarketPrice: price,
+          regularMarketDayHigh: meta.regularMarketDayHigh,
+          regularMarketDayLow: meta.regularMarketDayLow,
+          regularMarketVolume: meta.regularMarketVolume,
+          marketCap: meta.marketCap,
+          fiftyTwoWeekHigh: meta.fiftyTwoWeekHigh,
+          fiftyTwoWeekLow: meta.fiftyTwoWeekLow,
+          regularMarketChange: change,
+          regularMarketChangePercent: changePercent,
+        };
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('fetchQuotes sembol hatası:', symbol, error);
+        return null;
+      }
+    }),
+  );
+
+  const validResults = results.filter(Boolean);
+
+  if (!validResults.length) {
+    throw new Error('Hiçbir sembol için Yahoo verisi alınamadı.');
+  }
+
+  return validResults;
+}
+
+export async function fetchChart(symbol, rangeKey) {
+  const paramsByRange = {
+    '1G': { range: '1d', interval: '5m' },
+    '1H': { range: '5d', interval: '30m' },
+    '1A': { range: '1mo', interval: '1d' },
+    '3A': { range: '3mo', interval: '1d' },
+    '6A': { range: '6mo', interval: '1d' },
+    '1Y': { range: '1y', interval: '1d' },
+    '5Y': { range: '5y', interval: '1wk' },
+    MAX: { range: 'max', interval: '1mo' },
+  };
+
+  const params = paramsByRange[rangeKey] || paramsByRange['1G'];
+
+  const url = `${API_BASE}/v8/finance/chart/${encodeURIComponent(
+    symbol,
+  )}?range=${params.range}&interval=${params.interval}&lang=tr-TR&region=TR`;
+
+  const json = await fetchWithCache(url);
+  const result = json?.chart?.result?.[0];
+
+  if (!result) {
+    return [];
+  }
+
+  const timestamps = result.timestamp || [];
+  const quotes = result.indicators?.quote?.[0] || {};
+  const closes = quotes.close || [];
+
+  if (!timestamps.length || !closes.length) {
+    return [];
+  }
+
+  const firstClose = closes.find((value) => typeof value === 'number');
+
+  if (!firstClose) {
+    return [];
+  }
+
+  const points = [];
+
+  for (let i = 0; i < timestamps.length; i += 1) {
+    const price = closes[i];
+    if (typeof price !== 'number') {
+      // Skip boş veri
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    const changePct = ((price - firstClose) / firstClose) * 100;
+
+    points.push({
+      time: new Date(timestamps[i] * 1000),
+      price,
+      changePct,
+    });
+  }
+
+  return points;
+}
+
+export async function searchSymbols(query) {
+  if (!query || query.length < 2) {
+    return [];
+  }
+
+  const url = `${API_BASE}/v1/finance/search?q=${encodeURIComponent(
+    query,
+  )}&lang=tr-TR&region=TR&quotesCount=10&newsCount=0`;
+
+  const json = await fetchWithCache(url);
+  return json?.quotes ?? [];
+}

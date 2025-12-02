@@ -1,0 +1,240 @@
+.asset-detail-root {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Genel hata mesajı */
+.asset-detail-error {
+  color: #ff3b30;
+  font-size: 13px;
+}
+
+/* HEADER – eskisi gibi: solda isim, sağda fiyat */
+.asset-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.asset-detail-header-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  flex: 1;
+}
+
+.asset-detail-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.asset-detail-symbol {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.asset-detail-name {
+  margin: 0;
+  font-size: 13px;
+  color: #e3e3e3;
+}
+
+.asset-detail-price-block {
+  text-align: right;
+}
+
+/* Fiyat */
+.asset-detail-price {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.asset-detail-change-row {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.asset-detail-change-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.asset-detail-change-value-positive,
+.asset-detail-change-icon-positive {
+  color: #4cd964;
+}
+
+.asset-detail-change-value-negative,
+.asset-detail-change-icon-negative {
+  color: #ff3b30;
+}
+
+.asset-detail-change-muted {
+  color: #e3e3e3;
+}
+
+/* CHART */
+.asset-detail-chart-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-detail-chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.asset-detail-chart-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.asset-detail-chart-card {
+  border-radius: 20px;
+  background-color: #1d1d1f;
+  padding: 12px 10px 6px;
+  outline: none;
+}
+
+.asset-detail-chart-card:focus {
+  outline: none;
+}
+
+.asset-detail-chart-toggle-desktop {
+  display: none;
+}
+
+.asset-detail-chart-toggle-mobile {
+  display: flex;
+  justify-content: center;
+}
+
+/* METRICS */
+.asset-detail-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.asset-detail-metrics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-detail-metrics-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Tab navbar */
+.asset-detail-metrics-tabs {
+  display: flex;
+  border-radius: 999px;
+  background-color: #2b2b2b;
+  padding: 3px;
+  gap: 4px;
+}
+
+.asset-detail-metrics-tab {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #f5f5f7;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+/* 🔥 Seçili tab beyaz */
+.asset-detail-metrics-tab--active {
+  background-color: #f5f5f7; /* beyaz */
+  color: #1d1d1f;
+  transform: translateY(-1px);
+}
+
+.asset-detail-metrics-tab:active {
+  transform: translateY(0);
+}
+
+/* Grid */
+.asset-detail-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.asset-detail-metric {
+  border-radius: 16px;
+  background-color: #2b2b2b;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.asset-detail-metric-label {
+  font-size: 11px;
+  color: #e3e3e3;
+  opacity: 0.8;
+}
+
+.asset-detail-metric-value {
+  font-size: 14px;
+}
+
+/* Genel loading text */
+.asset-detail-loading {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #e3e3e3;
+}
+
+/* DESKTOP düzenlemeleri */
+@media (min-width: 768px) {
+  .asset-detail-root {
+    gap: 24px;
+  }
+
+  .asset-detail-symbol {
+    font-size: 28px;
+  }
+
+  .asset-detail-price {
+    font-size: 28px;
+  }
+
+  .asset-detail-chart-card {
+    padding: 16px 12px 10px;
+  }
+
+  .asset-detail-chart-header {
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .asset-detail-chart-toggle-desktop {
+    display: flex;
+  }
+
+  .asset-detail-chart-toggle-mobile {
+    display: none;
+  }
+
+  .asset-detail-metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
