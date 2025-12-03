@@ -11,6 +11,10 @@
     {
       "source": "/search",
       "destination": "/"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
