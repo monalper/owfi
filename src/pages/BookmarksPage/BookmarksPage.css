@@ -17,55 +17,59 @@
   font-weight: 600;
 }
 
-.bookmarks-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* SETTINGS BUTTON (IoMdSettings) */
+/* SETTINGS BUTTON (IoMdSettings) IN HEADER */
 .bookmarks-settings-button {
-  width: 32px;
-  height: 32px;
-  border: none;         /* sınır yok */
-  background: none;     /* arkaplan tamamen kaldırıldı */
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
   color: #f5f5f7;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  padding: 0;           /* yuvarlak görünümü engelle */
+  padding: 0;
+}
+
+.bookmarks-settings-button svg {
+  width: 22px;
+  height: 22px;
 }
 
 .bookmarks-settings-button:hover {
-  background: none;     /* hover’da da arkaplan olmasın */
-  opacity: 0.7;         /* hover feedback */
+  background: none;
+  opacity: 0.7;
 }
 
-/* HEADER'DAKİ KAYDET BUTONU (SİLME MODU İÇİN) */
+/* HEADER SAVE BUTTON (DELETE MODE) */
 .bookmarks-save-button {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 999px;
   border: none;
-  background: #30d158; /* mavi yerine yeşil */
-  color: #000000; /* tik ikonu siyah */
+  background: #30d158;
+  color: #000000;
   display: flex;
   align-items: center;
-  justify-content: center; /* tam ortalama */
+  justify-content: center;
   cursor: pointer;
   line-height: 0;
+}
+
+.bookmarks-save-button svg {
+  width: 22px;
+  height: 22px;
 }
 
 .bookmarks-save-button:hover {
   background: #28b04c;
 }
 
-/* CLEAR ALL BUTTON (POPUP İÇİN DE KULLANILIYOR) */
+/* CLEAR ALL BUTTON (legacy, header-level) */
 .bookmarks-clear-button {
   border: none;
-  background: #ff3b30; /* kırmızı */
-  color: #ffffff; /* yazı beyaz */
+  background: #ff3b30;
+  color: #ffffff;
   font-size: 12px;
   padding: 6px 10px;
   border-radius: 999px;
@@ -105,7 +109,7 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* ITEM WRAPPER (TEK TEK SİLME BUTONU VE BLOKER İÇİN) */
+/* ITEM WRAPPER (DELETE MODE + BLOCKER) */
 .bookmarks-item-wrapper {
   position: relative;
   transition: transform 0.15s ease;
@@ -115,7 +119,7 @@
   transform: scale(0.97);
 }
 
-/* iOS BENZERİ ÇÖP İKONU BUTONU */
+/* iOS-LIKE DELETE PILL BUTTON ON CARD */
 .bookmarks-item-delete-button {
   position: absolute;
   top: 8px;
@@ -131,11 +135,10 @@
   justify-content: center;
   font-size: 14px;
   cursor: pointer;
-  box-shadow: 0 0 0 2px #1c1c1e;
-  z-index: 2; /* kartın ve blocker'ın üstünde */
+  z-index: 2;
 }
 
-/* SİLME MODUNDA KARTLARI BLOKLAYAN ŞEFFAF LAYER */
+/* TRANSPARENT BLOCKER LAYER IN DELETE MODE */
 .bookmarks-item-blocker {
   position: absolute;
   inset: 0;
@@ -156,25 +159,24 @@
 
 /* SETTINGS POPUP MODAL */
 .bookmarks-settings-modal {
-  background: #1c1c1e;
-  border-radius: 16px;
-  /* border kaldırıldı */
-  padding: 16px 18px;
-  width: 320px;
+  background: #1d1d1f;
+  border-radius: 18px;
+  padding: 16px 18px 14px;
+  width: 340px;
   max-width: calc(100% - 40px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
 .bookmarks-settings-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .bookmarks-settings-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -188,6 +190,9 @@
 
 .bookmarks-settings-section {
   margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #2b2b2b;
 }
 
 .bookmarks-settings-section-title {
@@ -198,31 +203,61 @@
   opacity: 0.9;
 }
 
-/* LAYOUT BUTTONLARI */
+/* LAYOUT BUTTONS / TAB BAR */
 .bookmarks-settings-layout-options {
+  position: relative;
   display: flex;
-  gap: 6px;
+  border-radius: 999px;
+  background: #1f1f21;
+  overflow: hidden;
+}
+
+.bookmarks-settings-layout-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: calc(100% / 3);
+  border-radius: inherit;
+  background: #f5f5f7;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.bookmarks-settings-layout-options--grid
+  .bookmarks-settings-layout-indicator {
+  transform: translateX(0);
+}
+
+.bookmarks-settings-layout-options--compact
+  .bookmarks-settings-layout-indicator {
+  transform: translateX(100%);
+}
+
+.bookmarks-settings-layout-options--list
+  .bookmarks-settings-layout-indicator {
+  transform: translateX(200%);
 }
 
 .bookmarks-settings-layout-button {
+  position: relative;
+  z-index: 1;
   flex: 1;
   border-radius: 999px;
-  border: none; /* border kaldırıldı */
-  background: #2c2c2e;
+  border: none;
+  background: transparent;
   color: #f5f5f7;
   font-size: 11px;
-  padding: 6px 8px;
+  padding: 6px 0;
   cursor: pointer;
 }
 
 .bookmarks-settings-layout-button--active {
-  /* mavi yerine yeşil #30d158 */
-  background: #30d15833;
-  color: #30d158;
+  color: #1d1d1f;
+  font-weight: 600;
 }
 
 .bookmarks-settings-layout-button:hover {
-  background: #3a3a3c;
+  background: transparent;
 }
 
 /* TOGGLE ROW */
@@ -234,48 +269,26 @@
   margin-top: 4px;
 }
 
-/* CUSTOM TOGGLE (DELETE MODE) */
-.bookmarks-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  font-size: 12px;
-  color: #e3e3e3;
-}
-
-.bookmarks-toggle input {
-  display: none;
-}
-
-.bookmarks-toggle-slider {
-  width: 34px;
-  height: 20px;
+.bookmarks-toggle-button {
   border-radius: 999px;
+  border: none;
   background: #3a3a3c;
-  position: relative;
-  transition: background 0.15s ease;
+  color: #f5f5f7;
+  font-size: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  font-weight: 600;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
 
-.bookmarks-toggle-slider::before {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #ffffff;
-  transition: transform 0.15s ease;
+.bookmarks-toggle-button--active {
+  background: #ff3b30;
 }
 
-/* checked state */
-.bookmarks-toggle input:checked + .bookmarks-toggle-slider {
-  background: #34c759;
-}
-
-.bookmarks-toggle input:checked + .bookmarks-toggle-slider::before {
-  transform: translateX(14px);
+.bookmarks-toggle-button:active {
+  transform: translateY(1px);
 }
 
 /* CLEAR ALL BUTTON IN POPUP */
@@ -283,9 +296,10 @@
   margin-top: 8px;
   width: 100%;
   border: none;
-  background: #ff3b30; /* kırmızı */
-  color: #ffffff; /* yazı beyaz */
+  background: #ff3b30;
+  color: #ffffff;
   font-size: 12px;
+  font-weight: 600;
   padding: 7px 10px;
   border-radius: 999px;
   cursor: pointer;
