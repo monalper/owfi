@@ -1,5 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;600;700&display=swap");
 
+/* Kaydırmayı engelle */
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+/* Sayfanın tamamen ortalanması */
 .not-found-page {
   min-height: 100vh;
   margin: 0;
@@ -24,9 +33,10 @@
   font-weight: 700;
 }
 
+/* İstediğin değişiklikler */
 .not-found-content p {
   margin-top: 0.75rem;
   font-size: 1rem;
-  color: #a1a1a6;
-  font-weight: 300;
+  color: #e3e3e3;
+  font-weight: 600; /* semibold */
 }
