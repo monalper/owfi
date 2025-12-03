@@ -5,9 +5,7 @@ import {
   getBookmarkedSymbols,
   setBookmarkedSymbols,
 } from '../../utils/bookmarksStorage.js';
-
-import { IoMdSettings } from 'react-icons/io';
-import { FaTrash, FaCheck } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
 
 import './BookmarksPage.css';
 
@@ -90,6 +88,37 @@ function BookmarksPage() {
     };
   }, [symbols]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new CustomEvent('bookmarks:deleteModeChanged', {
+        detail: { deleteMode },
+      }),
+    );
+  }, [deleteMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleOpenSettingsEvent = () => {
+      setDeleteMode(false);
+      setIsSettingsOpen(true);
+    };
+
+    const handleSaveChangesEvent = () => {
+      setDeleteMode(false);
+      setIsSettingsOpen(true);
+    };
+
+    window.addEventListener('bookmarks:openSettings', handleOpenSettingsEvent);
+    window.addEventListener('bookmarks:saveChanges', handleSaveChangesEvent);
+
+    return () => {
+      window.removeEventListener('bookmarks:openSettings', handleOpenSettingsEvent);
+      window.removeEventListener('bookmarks:saveChanges', handleSaveChangesEvent);
+    };
+  }, []);
+
   const handleClearAll = () => {
     setBookmarkedSymbols([]);
     setSymbols([]);
@@ -109,18 +138,11 @@ function BookmarksPage() {
 
   const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
 
-  const openSettings = () => {
-    // popup açılırken silme modu kapalı olsun
-    setDeleteMode(false);
-    setIsSettingsOpen(true);
-  };
-
   const closeSettings = () => setIsSettingsOpen(false);
 
   const handleToggleDeleteMode = () => {
     setDeleteMode((prev) => {
       const next = !prev;
-      // silme modu açılırken popup kapansın
       if (next) {
         setIsSettingsOpen(false);
       }
@@ -132,37 +154,12 @@ function BookmarksPage() {
     setLayoutType(type);
   };
 
-  const handleSaveClick = () => {
-    // Kaydet ikonuna basınca popup geri açılsın, silme modu kapalı açılsın
-    setDeleteMode(false);
-    setIsSettingsOpen(true);
-  };
+  const layoutOptionsClassName = `bookmarks-settings-layout-options bookmarks-settings-layout-options--${layoutType}`;
 
   return (
     <div className="bookmarks-root">
       <header className="bookmarks-header">
         <h1 className="bookmarks-title">Kaydedilenler</h1>
-
-        <div className="bookmarks-actions">
-          {deleteMode && (
-            <button
-              type="button"
-              className="bookmarks-save-button"
-              onClick={handleSaveClick}
-              aria-label="Kaydet"
-            >
-              <FaCheck />
-            </button>
-          )}
-          <button
-            type="button"
-            className="bookmarks-settings-button"
-            onClick={openSettings}
-            aria-label="Ayarlar"
-          >
-            <IoMdSettings />
-          </button>
-        </div>
       </header>
 
       {error && (
@@ -246,7 +243,8 @@ function BookmarksPage() {
               <div className="bookmarks-settings-section-title">
                 Görünüm
               </div>
-              <div className="bookmarks-settings-layout-options">
+              <div className={layoutOptionsClassName}>
+                <div className="bookmarks-settings-layout-indicator" />
                 <button
                   type="button"
                   className={`bookmarks-settings-layout-button${
@@ -288,15 +286,15 @@ function BookmarksPage() {
                 Silme
               </div>
               <div className="bookmarks-settings-row">
-                <label className="bookmarks-toggle">
-                  <input
-                    type="checkbox"
-                    checked={deleteMode}
-                    onChange={handleToggleDeleteMode}
-                  />
-                  <span className="bookmarks-toggle-slider" />
-                  <span>Tek tek silme modunu aç</span>
-                </label>
+                <button
+                  type="button"
+                  className={`bookmarks-toggle-button${
+                    deleteMode ? ' bookmarks-toggle-button--active' : ''
+                  }`}
+                  onClick={handleToggleDeleteMode}
+                >
+                  Tek tek silme modu
+                </button>
               </div>
 
               <button
@@ -315,3 +313,4 @@ function BookmarksPage() {
 }
 
 export default BookmarksPage;
+
