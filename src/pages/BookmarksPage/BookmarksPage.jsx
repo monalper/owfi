@@ -7,7 +7,7 @@ import {
 } from '../../utils/bookmarksStorage.js';
 
 import { IoMdSettings } from 'react-icons/io';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaCheck } from 'react-icons/fa';
 
 import './BookmarksPage.css';
 
@@ -133,7 +133,7 @@ function BookmarksPage() {
   };
 
   const handleSaveClick = () => {
-    // sağ alttaki kaydet: popup geri açılsın, silme modu kapalı olsun
+    // Kaydet ikonuna basınca popup geri açılsın, silme modu kapalı açılsın
     setDeleteMode(false);
     setIsSettingsOpen(true);
   };
@@ -144,10 +144,21 @@ function BookmarksPage() {
         <h1 className="bookmarks-title">Kaydedilenler</h1>
 
         <div className="bookmarks-actions">
+          {deleteMode && (
+            <button
+              type="button"
+              className="bookmarks-save-button"
+              onClick={handleSaveClick}
+              aria-label="Kaydet"
+            >
+              <FaCheck />
+            </button>
+          )}
           <button
             type="button"
             className="bookmarks-settings-button"
             onClick={openSettings}
+            aria-label="Ayarlar"
           >
             <IoMdSettings />
           </button>
@@ -180,13 +191,17 @@ function BookmarksPage() {
                 }`}
               >
                 {deleteMode && (
-                  <button
-                    type="button"
-                    className="bookmarks-item-delete-button"
-                    onClick={() => handleDeleteSymbol(symbol)}
-                  >
-                    <FaTrash />
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="bookmarks-item-delete-button"
+                      onClick={() => handleDeleteSymbol(symbol)}
+                      aria-label={`${symbol} kaydını sil`}
+                    >
+                      <FaTrash />
+                    </button>
+                    <div className="bookmarks-item-blocker" />
+                  </>
                 )}
                 <AssetCard
                   symbol={symbol}
@@ -221,6 +236,7 @@ function BookmarksPage() {
                 type="button"
                 className="bookmarks-settings-close"
                 onClick={closeSettings}
+                aria-label="Kapat"
               >
                 ×
               </button>
@@ -293,17 +309,6 @@ function BookmarksPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* SAĞ ALTA KAYDET BUTONU: sadece tek tek silme modu açıkken */}
-      {deleteMode && (
-        <button
-          type="button"
-          className="bookmarks-save-fab"
-          onClick={handleSaveClick}
-        >
-          Kaydet
-        </button>
       )}
     </div>
   );
