@@ -17,6 +17,18 @@
   justify-content: space-between;
 }
 
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .header__back-button {
   border: none;
   background: none;
@@ -158,6 +170,19 @@
     align-items: center;
     justify-content: center;
     position: absolute;
+    right: 12px;
+  }
+
+  .header__content .bookmarks-save-button,
+  .header__content .bookmarks-settings-button {
+    position: absolute;
+  }
+
+  .header__content .bookmarks-save-button {
+    right: 48px;
+  }
+
+  .header__content .bookmarks-settings-button {
     right: 12px;
   }
 
