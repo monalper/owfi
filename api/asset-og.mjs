@@ -4,129 +4,194 @@ import {
   DEFAULT_DESCRIPTION,
   DEFAULT_PAGE_TITLE,
   buildAssetMeta,
+  normalizeAssetSymbol,
 } from './meta-utils.mjs';
 
-export const config = {
-  runtime: 'edge',
-};
-
-export default async function handler(req) {
+export default async function handler(req, res) {
   try {
-    const { searchParams } = new URL(req.url);
-    const symbol =
-      searchParams.get('symbol') ||
-      searchParams.get('s') ||
-      '';
+    const host = req.headers.host || 'localhost:3000';
+    const isLocalhost =
+      host.startsWith('localhost') || host.startsWith('127.0.0.1');
+    const protocol = isLocalhost ? 'http' : 'https';
 
-    let title = DEFAULT_PAGE_TITLE;
-    let description = DEFAULT_DESCRIPTION;
+    const url = new URL(req.url || '/', `${protocol}://${host}`);
+    const symbolParam =
+      url.searchParams.get('symbol') || url.searchParams.get('s') || '';
+
+    const symbol = symbolParam || '';
+
+    let meta = {
+      title: DEFAULT_PAGE_TITLE,
+      description: DEFAULT_DESCRIPTION,
+      price: undefined,
+      change: undefined,
+      changePercent: undefined,
+    };
 
     if (symbol) {
-      const meta = await buildAssetMeta(symbol);
-      if (meta?.title) {
-        title = meta.title;
-      }
-      if (meta?.description) {
-        description = meta.description;
-      }
+      const baseMeta = await buildAssetMeta(symbol);
+      meta = { ...meta, ...baseMeta };
     }
 
-    const titleText =
-      (title || '').replace(/\s*\|\s*Openwall Finance\s*$/i, '') ||
-      'Openwall Finance';
+    const displaySymbol = normalizeAssetSymbol(symbol || '');
 
-    const shortDescription =
-      description && description.length > 140
-        ? `${description.slice(0, 137)}...`
-        : description;
+    const nameFromTitle =
+      meta.title && typeof meta.title === 'string'
+        ? meta.title.replace(/\s*\|\s*Openwall Finance\s*$/i, '')
+        : '';
 
-    return new ImageResponse(
+    const longName = nameFromTitle || displaySymbol || symbol || 'Varlık';
+
+    const hasPrice =
+      typeof meta.price === 'number' && Number.isFinite(meta.price);
+    const hasChangePercent =
+      typeof meta.changePercent === 'number' &&
+      Number.isFinite(meta.changePercent);
+
+    let priceText = '';
+    let isUp = false;
+
+    if (hasPrice) {
+      const p = meta.price;
+      priceText = `${p.toFixed(2)} TRY`;
+    }
+
+    if (hasChangePercent) {
+      const cp = meta.changePercent;
+      const sign = cp >= 0 ? '+' : '';
+      priceText = priceText
+        ? `${priceText} ${sign}${cp.toFixed(2)}%`
+        : `${sign}${cp.toFixed(2)}%`;
+      isUp = cp >= 0;
+    }
+
+    const logoUrl = `${protocol}://${host}/logo.svg`;
+
+    const rootStyle = {
+      width: '100%',
+      height: '100%',
+      backgroundColor: '#111827',
+      color: '#F9FAFB',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily:
+        'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      position: 'relative',
+    };
+
+    const logoWrapperStyle = {
+      position: 'absolute',
+      top: 72,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    };
+
+    const symbolStyle = {
+      fontSize: 96,
+      fontWeight: 800,
+      letterSpacing: '-0.06em',
+      textTransform: 'uppercase',
+      textAlign: 'center',
+    };
+
+    const nameStyle = {
+      marginTop: 24,
+      fontSize: 40,
+      color: '#9CA3AF',
+      textAlign: 'center',
+      maxWidth: '80%',
+    };
+
+    const priceStyle = {
+      marginTop: 32,
+      fontSize: 48,
+      fontWeight: 700,
+      color: isUp ? '#22C55E' : '#EF4444',
+      textAlign: 'center',
+    };
+
+    const footerStyle = {
+      position: 'absolute',
+      bottom: 64,
+      fontSize: 32,
+      color: '#E5E7EB',
+    };
+
+    const element = React.createElement(
+      'div',
+      { style: rootStyle },
       React.createElement(
         'div',
-        {
-          style: {
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            padding: 80,
-            background:
-              'radial-gradient(circle at 0 0, #3b82f6 0, #020617 45%, #020617 100%)',
-            color: '#f9fafb',
-            fontFamily:
-              'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-          },
-        },
-        React.createElement(
-          'div',
-          {
-            style: {
-              fontSize: 28,
-              fontWeight: 500,
-              opacity: 0.9,
-            },
-          },
-          'Openwall Finance',
-        ),
-        React.createElement(
-          'div',
-          {
-            style: {
-              fontSize: 72,
-              fontWeight: 700,
-              letterSpacing: '-0.04em',
-              lineHeight: 1.1,
-              maxWidth: '80%',
-            },
-          },
-          titleText,
-        ),
-        React.createElement(
-          'div',
-          {
-            style: {
-              fontSize: 24,
-              opacity: 0.9,
-              maxWidth: '80%',
-            },
-          },
-          shortDescription,
-        ),
+        { style: logoWrapperStyle },
+        React.createElement('img', {
+          src: logoUrl,
+          width: 64,
+          height: 64,
+          alt: 'Openwall Finance',
+        }),
       ),
-      {
-        width: 1200,
-        height: 630,
-      },
+      React.createElement('div', { style: symbolStyle }, displaySymbol),
+      React.createElement('div', { style: nameStyle }, longName),
+      priceText
+        ? React.createElement('div', { style: priceStyle }, priceText)
+        : null,
+      React.createElement('div', { style: footerStyle }, 'Openwall Finance'),
     );
+
+    const image = new ImageResponse(element, {
+      width: 1200,
+      height: 630,
+    });
+
+    const arrayBuffer = await image.arrayBuffer();
+    image.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
+    res.statusCode = image.status || 200;
+    res.end(Buffer.from(arrayBuffer));
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('asset-og handler error', error);
 
-    return new ImageResponse(
-      React.createElement(
-        'div',
-        {
-          style: {
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#020617',
-            color: '#f9fafb',
-            fontSize: 48,
-            fontFamily:
-              'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    try {
+      const fallback = new ImageResponse(
+        React.createElement(
+          'div',
+          {
+            style: {
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: '#111827',
+              color: '#F9FAFB',
+              fontSize: 48,
+              fontFamily:
+                'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+            },
           },
-        },
-        'Openwall Finance',
-      ),
-      {
-        width: 1200,
-        height: 630,
-      },
-    );
+          'Openwall Finance',
+        ),
+        { width: 1200, height: 630 },
+      );
+
+      const buf = Buffer.from(await fallback.arrayBuffer());
+      fallback.headers.forEach((value, key) => {
+        res.setHeader(key, value);
+      });
+      res.statusCode = fallback.status || 200;
+      res.end(buf);
+    } catch (innerError) {
+      // eslint-disable-next-line no-console
+      console.error('asset-og fallback error', innerError);
+      res.statusCode = 500;
+      res.setHeader('content-type', 'text/plain; charset=utf-8');
+      res.end('OG image error');
+    }
   }
 }
 
