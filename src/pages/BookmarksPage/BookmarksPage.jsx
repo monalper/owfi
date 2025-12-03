@@ -5,6 +5,9 @@ import {
   getBookmarkedSymbols,
   setBookmarkedSymbols,
 } from '../../utils/bookmarksStorage.js';
+
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
+
 import './BookmarksPage.css';
 
 function BookmarksPage() {
@@ -13,7 +16,9 @@ function BookmarksPage() {
   const [charts, setCharts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const [layoutType, setLayoutType] = useState('grid'); // grid | compact | list
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const initial = getBookmarkedSymbols();
@@ -41,9 +46,7 @@ function BookmarksPage() {
 
         const bySymbol = {};
         result.forEach((item) => {
-          if (item && item.symbol) {
-            bySymbol[item.symbol] = item;
-          }
+          if (item?.symbol) bySymbol[item.symbol] = item;
         });
         setQuotes(bySymbol);
 
@@ -55,7 +58,7 @@ function BookmarksPage() {
             } catch {
               return [symbol, []];
             }
-          }),
+          })
         );
 
         if (cancelled) return;
@@ -70,14 +73,11 @@ function BookmarksPage() {
           setError(err.message || 'Kaydedilenler yüklenirken hata oluştu.');
         }
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
 
     load();
-
     return () => {
       cancelled = true;
     };
@@ -90,11 +90,14 @@ function BookmarksPage() {
 
   const orderedSymbols = useMemo(
     () => symbols.slice().sort((a, b) => a.localeCompare(b)),
-    [symbols],
+    [symbols]
   );
 
-  const handleLayoutChange = (event) => {
-    setLayoutType(event.target.value);
+  const toggleDropdown = () => setDropdownOpen((x) => !x);
+
+  const selectLayout = (type) => {
+    setLayoutType(type);
+    setDropdownOpen(false);
   };
 
   const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
@@ -102,25 +105,49 @@ function BookmarksPage() {
   return (
     <div className="bookmarks-root">
       <header className="bookmarks-header">
-        <div>
-          <h1 className="bookmarks-title">Kaydedilenler</h1>
-          {/* Eski alt metin kaldırıldı:
-              "Favori hisse, fon ve dövizlerinizi tek yerde görün." */}
-        </div>
+        <h1 className="bookmarks-title">Kaydedilenler</h1>
 
         {symbols.length > 0 && (
           <div className="bookmarks-actions">
-            <div className="bookmarks-layout-control">
-              <span className="bookmarks-layout-label">Listeleme tipi</span>
-              <select
-                className="bookmarks-layout-select"
-                value={layoutType}
-                onChange={handleLayoutChange}
+
+            {/* CUSTOM DROPDOWN */}
+            <div className="bookmarks-dropdown-wrapper">
+              <button
+                type="button"
+                className="bookmarks-dropdown-button"
+                onClick={toggleDropdown}
               >
-                <option value="grid">Grid</option>
-                <option value="compact">Sıkı grid</option>
-                <option value="list">Liste</option>
-              </select>
+                {layoutType === 'grid' && 'Grid'}
+                {layoutType === 'compact' && 'Sıkı Grid'}
+                {layoutType === 'list' && 'Liste'}
+
+                <span className="bookmarks-dropdown-icon">
+                  {dropdownOpen ? <FaArrowUp /> : <FaArrowDown />}
+                </span>
+              </button>
+
+              {dropdownOpen && (
+                <div className="bookmarks-dropdown-menu">
+                  <div
+                    className="bookmarks-dropdown-item"
+                    onClick={() => selectLayout('grid')}
+                  >
+                    Grid
+                  </div>
+                  <div
+                    className="bookmarks-dropdown-item"
+                    onClick={() => selectLayout('compact')}
+                  >
+                    Sıkı Grid
+                  </div>
+                  <div
+                    className="bookmarks-dropdown-item"
+                    onClick={() => selectLayout('list')}
+                  >
+                    Liste
+                  </div>
+                </div>
+              )}
             </div>
 
             <button
@@ -140,9 +167,6 @@ function BookmarksPage() {
         </div>
       )}
 
-      {/* Boş durum mesajı tamamen kaldırıldı:
-          "Henüz kaydedilmiş bir varlık yok..." */}
-
       {loading && (
         <div className="bookmarks-message">
           <span>Kaydedilenler yükleniyor…</span>
@@ -151,22 +175,18 @@ function BookmarksPage() {
 
       {!loading && symbols.length > 0 && (
         <section className={listClassName}>
-          {orderedSymbols.map((symbol) => {
-            const quote = quotes[symbol];
-            const chartData = charts[symbol];
-            return (
-              <AssetCard
-                key={symbol}
-                symbol={symbol}
-                longName={quote?.longName}
-                shortName={quote?.shortName}
-                regularMarketPrice={quote?.regularMarketPrice}
-                change={quote?.regularMarketChange}
-                changePercent={quote?.regularMarketChangePercent}
-                chartData={chartData}
-              />
-            );
-          })}
+          {orderedSymbols.map((symbol) => (
+            <AssetCard
+              key={symbol}
+              symbol={symbol}
+              longName={quotes[symbol]?.longName}
+              shortName={quotes[symbol]?.shortName}
+              regularMarketPrice={quotes[symbol]?.regularMarketPrice}
+              change={quotes[symbol]?.regularMarketChange}
+              changePercent={quotes[symbol]?.regularMarketChangePercent}
+              chartData={charts[symbol]}
+            />
+          ))}
         </section>
       )}
     </div>
