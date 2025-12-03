@@ -7,6 +7,25 @@ import {
   normalizeAssetSymbol,
 } from './meta-utils.mjs';
 
+function guessCurrencyCode(symbol, metaCurrency) {
+  if (typeof metaCurrency === 'string' && metaCurrency.trim() !== '') {
+    return metaCurrency.trim().toUpperCase();
+  }
+
+  const upper = String(symbol || '').toUpperCase();
+  if (!upper) return undefined;
+
+  if (upper.endsWith('.IS') || upper.includes('TRY') || upper.startsWith('XU')) {
+    return 'TRY';
+  }
+  if (upper.includes('EUR')) return 'EUR';
+  if (upper.includes('GBP')) return 'GBP';
+  if (upper.includes('JPY')) return 'JPY';
+  if (upper.includes('USD')) return 'USD';
+
+  return undefined;
+}
+
 export default async function handler(req, res) {
   try {
     const host = req.headers.host || 'localhost:3000';
@@ -26,6 +45,7 @@ export default async function handler(req, res) {
       price: undefined,
       change: undefined,
       changePercent: undefined,
+      currency: undefined,
     };
 
     if (symbol) {
@@ -51,9 +71,12 @@ export default async function handler(req, res) {
     let priceText = '';
     let isUp = false;
 
+    const currencyCode = guessCurrencyCode(symbol, meta.currency);
+
     if (hasPrice) {
       const p = meta.price;
-      priceText = `${p.toFixed(2)} TRY`;
+      const base = p.toFixed(2);
+      priceText = currencyCode ? `${base} ${currencyCode}` : base;
     }
 
     if (hasChangePercent) {
@@ -116,7 +139,8 @@ export default async function handler(req, res) {
     const footerStyle = {
       position: 'absolute',
       bottom: 64,
-      fontSize: 32,
+      fontSize: 24,
+      fontWeight: 600,
       color: '#E5E7EB',
     };
 
@@ -171,7 +195,7 @@ export default async function handler(req, res) {
               color: '#F9FAFB',
               fontSize: 48,
               fontFamily:
-                'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                '"Inter Tight", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             },
           },
           'Openwall Finance',
@@ -194,3 +218,4 @@ export default async function handler(req, res) {
     }
   }
 }
+
