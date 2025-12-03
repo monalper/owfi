@@ -38,10 +38,16 @@ async function buildAssetMeta(symbol) {
     return {
       title: DEFAULT_PAGE_TITLE,
       description: DEFAULT_DESCRIPTION,
+      price: undefined,
+      change: undefined,
+      changePercent: undefined,
     };
   }
 
   let displayName = normalizeAssetSymbol(symbol);
+  let price;
+  let change;
+  let changePercent;
 
   try {
     const targetUrl = `${YAHOO_TARGET}/v8/finance/chart/${encodeURIComponent(
@@ -64,6 +70,21 @@ async function buildAssetMeta(symbol) {
       if (longName || shortName) {
         displayName = longName || shortName;
       }
+
+      price = meta.regularMarketPrice;
+      const previousClose =
+        typeof meta.previousClose === 'number'
+          ? meta.previousClose
+          : meta.chartPreviousClose;
+
+      if (
+        typeof price === 'number' &&
+        typeof previousClose === 'number' &&
+        previousClose !== 0
+      ) {
+        change = price - previousClose;
+        changePercent = (change / previousClose) * 100;
+      }
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -74,7 +95,7 @@ async function buildAssetMeta(symbol) {
   const title = `${name} | Openwall Finance`;
   const description = `${name} için fiyat, grafik ve özet piyasa verileri. Piyasaları Openwall Finance'den takip edin.`;
 
-  return { title, description };
+  return { title, description, price, change, changePercent };
 }
 
 function patchHtmlWithMeta(html, { title, description, image }) {
