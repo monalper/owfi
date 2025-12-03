@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import { useParams } from 'react-router-dom';
 import { TbArrowUpRight, TbArrowDownLeft } from 'react-icons/tb';
+import { RiBookmarkLine, RiBookmarkFill } from 'react-icons/ri';
 import {
   fetchChart,
   fetchQuotes,
@@ -19,6 +20,10 @@ import AssetChart from '../../components/AssetChart/AssetChart.jsx';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
 import TimeRangeToggle from '../../components/TimeRangeToggle/TimeRangeToggle.jsx';
 import NewsCard from '../../components/NewsCard/NewsCard.jsx';
+import {
+  isSymbolBookmarked,
+  toggleSymbolBookmark,
+} from '../../utils/bookmarksStorage.js';
 import './AssetDetailPage.css';
 
 const priceFormatter = new Intl.NumberFormat('tr-TR', {
@@ -202,6 +207,7 @@ function AssetDetailPage() {
 
   const pageRef = useRef(null);
   const chartContainerRef = useRef(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   // Sayfa ilk yüklendiğinde grafik alanı otomatik seçili gelmesin
   useEffect(() => {
@@ -264,11 +270,17 @@ function AssetDetailPage() {
       }
     }
 
-    loadQuote();
+      loadQuote();
 
-    return () => {
-      cancelled = true;
-    };
+      return () => {
+        cancelled = true;
+      };
+    }, [symbol]);
+
+  // Bookmark durumunu yÇ¬kle
+  useEffect(() => {
+    if (!symbol) return;
+    setIsBookmarked(isSymbolBookmarked(symbol));
   }, [symbol]);
 
   // Şirket profili
@@ -518,6 +530,12 @@ function AssetDetailPage() {
       ? companyNews
       : companyNews.slice(0, 2);
 
+  const handleBookmarkClick = () => {
+    if (!symbol) return;
+    const next = toggleSymbolBookmark(symbol);
+    setIsBookmarked(next);
+  };
+
   return (
     <div className="asset-detail-root" ref={pageRef}>
       {error && (
@@ -536,6 +554,25 @@ function AssetDetailPage() {
           </div>
         </div>
         <div className="asset-detail-price-block">
+          <button
+            type="button"
+            className={`asset-detail-bookmark-button ${
+              isBookmarked ? 'asset-detail-bookmark-button--active' : ''
+            }`}
+            onClick={handleBookmarkClick}
+            aria-pressed={isBookmarked}
+            aria-label={
+              isBookmarked
+                ? 'Kaydedilenlerden kaldır'
+                : 'Kaydedilenlere ekle'
+            }
+          >
+            {isBookmarked ? (
+              <RiBookmarkFill className="asset-detail-bookmark-icon" />
+            ) : (
+              <RiBookmarkLine className="asset-detail-bookmark-icon" />
+            )}
+          </button>
           <div className="asset-detail-price">
             {typeof displayPrice === 'number'
               ? priceFormatter.format(displayPrice)
@@ -715,6 +752,7 @@ function AssetDetailPage() {
                     publisher={item.publisher}
                     publishedAt={item.publishedAt}
                     thumbnailUrl={item.thumbnailUrl}
+                    link={item.link}
                   />
                 ))}
               </div>

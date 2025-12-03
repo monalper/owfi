@@ -1,3 +1,9 @@
+.news-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
 .news-card-root {
   display: flex;
   flex-direction: column;

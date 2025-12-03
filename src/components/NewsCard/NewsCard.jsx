@@ -19,10 +19,10 @@ function formatDateShort(date) {
   }
 }
 
-function NewsCard({ title, publisher, publishedAt, thumbnailUrl }) {
+function NewsCard({ title, publisher, publishedAt, thumbnailUrl, link }) {
   const dateLabel = publishedAt ? formatDateShort(publishedAt) : null;
 
-  return (
+  const content = (
     <div className="news-card-root">
       <div className="news-card-main">
         <div className="news-card-text">
@@ -50,6 +50,21 @@ function NewsCard({ title, publisher, publishedAt, thumbnailUrl }) {
       </div>
     </div>
   );
+
+  if (link) {
+    return (
+      <a
+        href={link}
+        target="_blank"
+        rel="noreferrer"
+        className="news-card-link"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return content;
 }
 
 export default NewsCard;
