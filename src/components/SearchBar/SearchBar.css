@@ -8,8 +8,8 @@
 }
 
 .searchbar-icon {
-  color: #e3e3e3;
-  opacity: 0.8;
+  color: #f5f5f7;
+  opacity: 0.9;
 }
 
 .searchbar-input {
@@ -29,11 +29,15 @@
 .searchbar-submit {
   border: none;
   outline: none;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
-  font-size: 13px;
-  padding: 6px 12px;
-  border-radius: 999px;
+  background-color: #444444;
+  color: #f5f5f7;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   cursor: pointer;
 }
 
@@ -46,4 +50,3 @@
     font-size: 15px;
   }
 }
-
