@@ -15,7 +15,8 @@ export default async function handler(req, res) {
       : symbolParam;
 
     const host = req.headers.host || 'localhost:3000';
-    const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+    const isLocalhost =
+      host.startsWith('localhost') || host.startsWith('127.0.0.1');
     const protocol = isLocalhost ? 'http' : 'https';
 
     const baseUrl = `${protocol}://${host}/`;
@@ -36,10 +37,19 @@ export default async function handler(req, res) {
     let meta = {
       title: DEFAULT_PAGE_TITLE,
       description: DEFAULT_DESCRIPTION,
+      image: undefined,
     };
 
     if (symbol) {
-      meta = await buildAssetMeta(symbol);
+      const baseMeta = await buildAssetMeta(symbol);
+      const imageUrl = `${protocol}://${host}/api/asset-og?symbol=${encodeURIComponent(
+        symbol,
+      )}`;
+
+      meta = {
+        ...baseMeta,
+        image: imageUrl,
+      };
     }
 
     const html = patchHtmlWithMeta(baseHtml, meta);
@@ -55,4 +65,3 @@ export default async function handler(req, res) {
     res.end('Internal Server Error');
   }
 }
-

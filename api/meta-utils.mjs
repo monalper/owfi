@@ -77,7 +77,7 @@ async function buildAssetMeta(symbol) {
   return { title, description };
 }
 
-function patchHtmlWithMeta(html, { title, description }) {
+function patchHtmlWithMeta(html, { title, description, image }) {
   const safeTitle = title || DEFAULT_PAGE_TITLE;
   const safeDescription = description || DEFAULT_DESCRIPTION;
 
@@ -112,6 +112,20 @@ function patchHtmlWithMeta(html, { title, description }) {
     )}" />`,
   );
 
+  if (image) {
+    const safeImage = escapeAttr(image);
+
+    nextHtml = nextHtml.replace(
+      /<meta\s+property=["']og:image["'][^>]*>/i,
+      `<meta property="og:image" content="${safeImage}" />`,
+    );
+
+    nextHtml = nextHtml.replace(
+      /<meta\s+name=["']twitter:image["'][^>]*>/i,
+      `<meta name="twitter:image" content="${safeImage}" />`,
+    );
+  }
+
   return nextHtml;
 }
 
@@ -120,5 +134,6 @@ export {
   DEFAULT_DESCRIPTION,
   buildAssetMeta,
   patchHtmlWithMeta,
+  normalizeAssetSymbol,
 };
 

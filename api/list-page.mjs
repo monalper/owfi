@@ -11,7 +11,8 @@ export default async function handler(req, res) {
     const listId = Array.isArray(idParam) ? idParam[0] : idParam;
 
     const host = req.headers.host || 'localhost:3000';
-    const isLocalhost = host.startsWith('localhost') || host.startsWith('127.0.0.1');
+    const isLocalhost =
+      host.startsWith('localhost') || host.startsWith('127.0.0.1');
     const protocol = isLocalhost ? 'http' : 'https';
 
     const baseUrl = `${protocol}://${host}/`;
@@ -19,12 +20,15 @@ export default async function handler(req, res) {
     const baseResponse = await fetch(baseUrl, {
       method: 'GET',
       headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
     });
 
     if (!baseResponse.ok) {
-      throw new Error(`Base HTML fetch failed with status ${baseResponse.status}`);
+      throw new Error(
+        `Base HTML fetch failed with status ${baseResponse.status}`,
+      );
     }
 
     const baseHtml = await baseResponse.text();
@@ -32,6 +36,7 @@ export default async function handler(req, res) {
     let meta = {
       title: DEFAULT_PAGE_TITLE,
       description: DEFAULT_DESCRIPTION,
+      image: undefined,
     };
 
     if (listId) {
@@ -40,8 +45,11 @@ export default async function handler(req, res) {
       if (list) {
         const title = `${list.title} | Openwall Finance`;
         const description = `${list.title} listesindeki seçili varlıklar ve piyasa verileri. Piyasaları Openwall Finance'dan takip edin.`;
+        const imageUrl = `${protocol}://${host}/api/list-og?id=${encodeURIComponent(
+          listId,
+        )}`;
 
-        meta = { title, description };
+        meta = { title, description, image: imageUrl };
       } else {
         meta = {
           title: 'Listeler | Openwall Finance',
