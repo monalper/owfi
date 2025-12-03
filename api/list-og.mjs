@@ -25,10 +25,6 @@ export default async function handler(req, res) {
     const titleText = list?.title || 'Liste';
 
     const logoUrl = `${protocol}://${host}/logo.svg`;
-    const iconUrl =
-      list && list.iconImage
-        ? `${protocol}://${host}${list.iconImage}`
-        : null;
 
     const rootStyle = {
       width: '100%',
@@ -52,27 +48,11 @@ export default async function handler(req, res) {
       justifyContent: 'center',
     };
 
-    const iconWrapperStyle = {
-      marginTop: 80,
-      marginBottom: 24,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    };
-
     const titleStyle = {
-      fontSize: 36,
+      fontSize: 52,
       fontWeight: 600,
       textAlign: 'center',
       maxWidth: '80%',
-    };
-
-    const footerStyle = {
-      position: 'absolute',
-      bottom: 64,
-      fontSize: 24,
-      fontWeight: 600,
-      color: '#E5E7EB',
     };
 
     const element = React.createElement(
@@ -88,20 +68,7 @@ export default async function handler(req, res) {
           alt: 'Openwall Finance',
         }),
       ),
-      iconUrl
-        ? React.createElement(
-            'div',
-            { style: iconWrapperStyle },
-            React.createElement('img', {
-              src: iconUrl,
-              width: 96,
-              height: 96,
-              alt: '',
-            }),
-          )
-        : null,
       React.createElement('div', { style: titleStyle }, titleText),
-      React.createElement('div', { style: footerStyle }, 'Openwall Finance'),
     );
 
     const image = new ImageResponse(element, {
@@ -157,4 +124,3 @@ export default async function handler(req, res) {
     }
   }
 }
-
