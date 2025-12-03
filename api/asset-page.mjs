@@ -48,13 +48,31 @@ export default async function handler(req, res) {
           ? baseMeta.title
           : DEFAULT_PAGE_TITLE;
 
-      const nameForImage =
+      const nameForTitle =
         baseTitle.replace(/\s*\|\s*Openwall Finance\s*$/i, '') ||
         String(symbol);
 
+      const hasPrice =
+        typeof baseMeta.price === 'number' &&
+        Number.isFinite(baseMeta.price);
+
+      const hasChangePercent =
+        typeof baseMeta.changePercent === 'number' &&
+        Number.isFinite(baseMeta.changePercent);
+
+      let ogText = nameForTitle;
+
+      if (hasPrice && hasChangePercent) {
+        const priceText = baseMeta.price.toFixed(2);
+        const sign = baseMeta.changePercent >= 0 ? '+' : '';
+        const percentText = `${sign}${baseMeta.changePercent.toFixed(2)}%`;
+
+        ogText = `${nameForTitle}\\n${priceText} (${percentText})`;
+      }
+
       const ogImageUrl = `https://og-image.vercel.app/${encodeURIComponent(
-        nameForImage,
-      )}.png?theme=dark&md=0&fontSize=72px`;
+        ogText,
+      )}.png?theme=dark&md=1&fontSize=72px`;
 
       meta = {
         ...baseMeta,
