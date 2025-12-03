@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     const rootStyle = {
       width: '100%',
       height: '100%',
-      backgroundColor: '#111827',
+      backgroundColor: '#1D1D1F',
       color: '#F9FAFB',
       display: 'flex',
       flexDirection: 'column',
@@ -167,7 +167,7 @@ export default async function handler(req, res) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: '#111827',
+              backgroundColor: '#1D1D1F',
               color: '#F9FAFB',
               fontSize: 48,
               fontFamily:
