@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily:
-        'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        '"Inter Tight", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       position: 'relative',
     };
 
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
 
     const symbolStyle = {
       fontSize: 96,
-      fontWeight: 800,
+      fontWeight: 600,
       letterSpacing: '-0.06em',
       textTransform: 'uppercase',
       textAlign: 'center',
@@ -194,4 +194,3 @@ export default async function handler(req, res) {
     }
   }
 }
-
