@@ -27,18 +27,19 @@
 .bookmarks-settings-button {
   width: 32px;
   height: 32px;
-  border-radius: 999px;
-  border: none; /* border kaldırıldı */
-  background: #1c1c1e;
+  border: none;         /* sınır yok */
+  background: none;     /* arkaplan tamamen kaldırıldı */
   color: #f5f5f7;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  padding: 0;           /* yuvarlak görünümü engelle */
 }
 
 .bookmarks-settings-button:hover {
-  background: #2c2c2e;
+  background: none;     /* hover’da da arkaplan olmasın */
+  opacity: 0.7;         /* hover feedback */
 }
 
 /* HEADER'DAKİ KAYDET BUTONU (SİLME MODU İÇİN) */
