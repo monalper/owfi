@@ -16,9 +16,100 @@
   font-weight: 600;
 }
 
+.search-page-section-title {
+  margin: 8px 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #e3e3e3;
+  opacity: 0.6;
+}
+
+.search-page-section-title::before,
+.search-page-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e3e3e3;
+  opacity: 0.6;
+}
+
 .search-page-error {
   font-size: 13px;
   color: #ff3b30;
+}
+
+.search-page-tabs {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  align-self: flex-start;
+  padding: 4px;
+  border-radius: 999px;
+  background-color: #2b2b2b;
+  isolation: isolate;
+}
+
+.search-page-tab {
+  position: relative;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  color: #e3e3e3;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.search-page-tab-active {
+  color: #1d1d1f;
+}
+
+.search-page-tab-label-desktop {
+  display: inline;
+}
+
+.search-page-tab-label-mobile {
+  display: none;
+}
+
+.search-page-tabs-glider {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  border-radius: 999px;
+  background-color: #f5f5f7;
+  z-index: 1;
+  transition: left 0.25s ease, width 0.25s ease;
+  pointer-events: none;
+}
+
+.search-page-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.search-page-lists .list-card-root + .list-card-root {
+  margin-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.search-page-lists-toggle {
+  margin-top: 8px;
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4cd964;
+  cursor: pointer;
 }
 
 .search-page-empty,
@@ -79,5 +170,26 @@
 
   .search-page-row {
     padding: 12px 14px;
+  }
+}
+
+@media (max-width: 767px) {
+  .search-page-tabs {
+    display: flex;
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .search-page-tab {
+    flex: 1 1 0;
+    text-align: center;
+  }
+
+  .search-page-tab-label-desktop {
+    display: none;
+  }
+
+  .search-page-tab-label-mobile {
+    display: inline;
   }
 }

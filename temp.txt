@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { searchSymbols } from '../../api/yahooClient.js';
 import SearchBar from '../../components/SearchBar/SearchBar.jsx';
@@ -7,33 +7,10 @@ import { PRESET_LISTS } from '../../config/lists.js';
 import './SearchResultsPage.css';
 
 const PAGE_SIZE = 20;
-const MAX_VISIBLE_LISTS = 4;
 
 const LIST_TABS = [
-  {
-    id: 'bist',
-    labelDesktop: 'Borsa Istanbul',
-    labelMobile: 'BIST',
-    market: 'bist',
-  },
-  {
-    id: 'us',
-    labelDesktop: 'ABD Borsalari',
-    labelMobile: 'ABD',
-    market: 'us',
-  },
-  {
-    id: 'funds',
-    labelDesktop: 'Fonlar',
-    labelMobile: 'Fonlar',
-    market: 'funds',
-  },
-  {
-    id: 'other',
-    labelDesktop: 'Diger Borsalar',
-    labelMobile: 'Borsalar',
-    market: 'other',
-  },
+  { id: 'us', label: 'ABD Borsası' },
+  { id: 'bist', label: 'BIST' },
 ];
 
 function SearchResultsPage() {
@@ -44,9 +21,6 @@ function SearchResultsPage() {
   const [error, setError] = useState(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [activeTab, setActiveTab] = useState(LIST_TABS[0].id);
-  const [showAllLists, setShowAllLists] = useState(false);
-  const [gliderStyle, setGliderStyle] = useState({ left: 0, width: 0 });
-  const tabRefs = useRef({});
 
   useEffect(() => {
     let cancelled = false;
@@ -69,7 +43,7 @@ function SearchResultsPage() {
         setVisibleCount(PAGE_SIZE);
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || 'Arama sirasinda bir hata olustu.');
+          setError(err.message || 'Arama sırasında bir hata oluştu.');
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -106,93 +80,41 @@ function SearchResultsPage() {
   const hasQuery = query.trim().length > 0;
   const hasResults = results.length > 0;
 
-  useEffect(() => {
-    const activeElement = tabRefs.current[activeTab];
-    if (activeElement) {
-      setGliderStyle({
-        left: activeElement.offsetLeft,
-        width: activeElement.offsetWidth,
-      });
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    setShowAllLists(false);
-  }, [activeTab]);
-
-  const activeMarket = LIST_TABS.find((tab) => tab.id === activeTab)?.market;
-
-  const listItems = PRESET_LISTS.filter(
-    (item) => !activeMarket || item.market === activeMarket,
-  );
-
-  const visibleListItems = showAllLists
-    ? listItems
-    : listItems.slice(0, MAX_VISIBLE_LISTS);
+  const listItems = PRESET_LISTS.filter((item) => item.market === activeTab);
 
   return (
     <div className="search-page-root">
       <section className="search-page-header">
-        <h1 className="search-page-title"></h1>
-        <SearchBar />
+        <SearchBar autoFocus />
       </section>
 
       {!hasQuery && (
         <>
-          <h2 className="search-page-section-title">
-            <span>Daha Fazlası</span>
-          </h2>
           <div className="search-page-tabs">
-            <div
-              className="search-page-tabs-glider"
-              style={{
-                left: gliderStyle.left,
-                width: gliderStyle.width,
-              }}
-            />
             {LIST_TABS.map((tab) => (
               <button
                 key={tab.id}
-                ref={(el) => {
-                  tabRefs.current[tab.id] = el;
-                }}
                 type="button"
                 className={`search-page-tab${
                   tab.id === activeTab ? ' search-page-tab-active' : ''
                 }`}
                 onClick={() => setActiveTab(tab.id)}
               >
-                <span className="search-page-tab-label-desktop">
-                  {tab.labelDesktop}
-                </span>
-                <span className="search-page-tab-label-mobile">
-                  {tab.labelMobile || tab.labelDesktop}
-                </span>
+                {tab.label}
               </button>
             ))}
           </div>
 
           <section className="search-page-lists">
-            {visibleListItems.map((list) => (
+            {listItems.map((list) => (
               <ListCard
                 key={list.id}
                 to={`/lists/${list.id}`}
                 icon={list.emoji}
-                iconImage={list.iconImage}
                 title={list.title}
               />
             ))}
           </section>
-
-          {listItems.length > MAX_VISIBLE_LISTS && (
-            <button
-              type="button"
-              className="search-page-lists-toggle"
-              onClick={() => setShowAllLists((prev) => !prev)}
-            >
-              {showAllLists ? 'Daha az liste' : 'Daha fazla liste'}
-            </button>
-          )}
         </>
       )}
 
@@ -210,13 +132,13 @@ function SearchResultsPage() {
 
       {hasQuery && !loading && !error && !hasResults && (
         <div className="search-page-empty">
-          <span>"{query}" icin sonuc bulunamadi.</span>
+          <span>"{query}" için sonuç bulunamadı.</span>
         </div>
       )}
 
       {loading && (
         <div className="search-page-loading">
-          <span>Sonuclar getiriliyor...</span>
+          <span>Sonuçlar getiriliyor...</span>
         </div>
       )}
 
@@ -247,3 +169,5 @@ function SearchResultsPage() {
 }
 
 export default SearchResultsPage;
+
+

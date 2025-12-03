@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FaSearch } from 'react-icons/fa';
+import { LuSearch } from "react-icons/lu";
 import './SearchBar.css';
 
 function SearchBar({ autoFocus = false }) {
@@ -22,18 +22,19 @@ function SearchBar({ autoFocus = false }) {
 
   return (
     <form className="searchbar-root" onSubmit={handleSubmit}>
+      <button type="submit" className="searchbar-submit" aria-label="Ara">
+        <LuSearch className="searchbar-icon" size={32} />
+      </button>
       <input
         className="searchbar-input"
-        placeholder="Hisse, fon, döviz ara"
+        placeholder="Openwall Finance'da ara"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         autoFocus={autoFocus}
       />
-      <button type="submit" className="searchbar-submit" aria-label="Ara">
-        <FaSearch className="searchbar-icon" size={14} />
-      </button>
     </form>
   );
 }
 
 export default SearchBar;
+
