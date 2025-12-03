@@ -2,13 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   RiHomeLine,
+  RiHomeFill,
   RiSearchLine,
+  RiSearchFill,
   RiInformationLine,
+  RiInformationFill,
   RiBookmarkLine,
   RiBookmarkFill,
   RiArrowLeftLine,
   RiDownloadLine,
 } from 'react-icons/ri';
+import { IoMdSettings } from 'react-icons/io';
+import { FaCheck } from 'react-icons/fa';
 import {
   isSymbolBookmarked,
   toggleSymbolBookmark,
@@ -21,6 +26,7 @@ function Header() {
   const navigate = useNavigate();
   const [assetSymbol, setAssetSymbol] = useState(null);
   const [isAssetBookmarked, setIsAssetBookmarked] = useState(false);
+  const [isBookmarksDeleteMode, setIsBookmarksDeleteMode] = useState(false);
 
   const handleLogoClick = () => navigate('/');
   const handleBackClick = () => navigate(-1);
@@ -119,98 +125,168 @@ function Header() {
     }
   };
 
+  const isBookmarksPage = location.pathname === '/bookmarks';
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const handleDeleteModeChanged = (event) => {
+      const next =
+        event && event.detail && typeof event.detail.deleteMode === 'boolean'
+          ? event.detail.deleteMode
+          : false;
+      setIsBookmarksDeleteMode(next);
+    };
+
+    window.addEventListener('bookmarks:deleteModeChanged', handleDeleteModeChanged);
+
+    return () => {
+      window.removeEventListener('bookmarks:deleteModeChanged', handleDeleteModeChanged);
+    };
+  }, []);
+
+  const handleBookmarksSettingsClick = () => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('bookmarks:openSettings'));
+  };
+
+  const handleBookmarksSaveClick = () => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('bookmarks:saveChanges'));
+  };
+
   return (
     <header className="header">
       <div className="header__content">
-        {location.pathname !== '/' && (
-          <button
-            type="button"
-            className="header__back-button"
-            onClick={handleBackClick}
-            aria-label="Geri"
-          >
-            <RiArrowLeftLine />
+        <div className="header__left">
+          {location.pathname !== '/' && (
+            <button
+              type="button"
+              className="header__back-button"
+              onClick={handleBackClick}
+              aria-label="Geri"
+            >
+              <RiArrowLeftLine />
+            </button>
+          )}
+
+          <button className="header__logo" onClick={handleLogoClick}>
+            <img src="/logo.svg" alt="logo" className="header__logo-img" />
+            <span className="header__logo--light">finance</span>
           </button>
-        )}
+        </div>
 
-        <button className="header__logo" onClick={handleLogoClick}>
-          <img src="/logo.svg" alt="logo" className="header__logo-img" />
-          <span className="header__logo--light">finance</span>
-        </button>
+        <div className="header__right">
+          {assetSymbol && (
+            <>
+              <button
+                type="button"
+                className={`header__bookmark-button ${
+                  isAssetBookmarked ? 'header__bookmark-button--active' : ''
+                }`}
+                onClick={handleHeaderBookmarkClick}
+                aria-pressed={isAssetBookmarked}
+                aria-label={
+                  isAssetBookmarked
+                    ? 'Kaydedilenlerden kaldır'
+                    : 'Kaydedilenlere ekle'
+                }
+              >
+                {isAssetBookmarked ? <RiBookmarkFill /> : <RiBookmarkLine />}
+              </button>
 
-        {assetSymbol && (
-          <>
-            <button
-              type="button"
-              className={`header__bookmark-button ${
-                isAssetBookmarked ? 'header__bookmark-button--active' : ''
+              <button
+                type="button"
+                className="header__export-button"
+                onClick={handleExportClick}
+                aria-label="Kartı dışa aktar"
+              >
+                <RiDownloadLine />
+              </button>
+            </>
+          )}
+
+          {isBookmarksPage && (
+            <>
+              {isBookmarksDeleteMode && (
+                <button
+                  type="button"
+                  className="bookmarks-save-button"
+                  onClick={handleBookmarksSaveClick}
+                  aria-label="Kaydet"
+                >
+                  <FaCheck />
+                </button>
+              )}
+              <button
+                type="button"
+                className="bookmarks-settings-button"
+                onClick={handleBookmarksSettingsClick}
+                aria-label="Ayarlar"
+              >
+                <IoMdSettings />
+              </button>
+            </>
+          )}
+
+          <nav className="header__nav">
+            <Link
+              to="/"
+              className={`header__link ${
+                location.pathname === '/' ? 'active' : ''
               }`}
-              onClick={handleHeaderBookmarkClick}
-              aria-pressed={isAssetBookmarked}
-              aria-label={
-                isAssetBookmarked
-                  ? 'Kaydedilenlerden kaldır'
-                  : 'Kaydedilenlere ekle'
-              }
             >
-              {isAssetBookmarked ? <RiBookmarkFill /> : <RiBookmarkLine />}
-            </button>
+              {location.pathname === '/' ? <RiHomeFill /> : <RiHomeLine />}
+              <span>Anasayfa</span>
+            </Link>
 
-            <button
-              type="button"
-              className="header__export-button"
-              onClick={handleExportClick}
-              aria-label="Kartı dışa aktar"
+            <Link
+              to="/search"
+              className={`header__link ${
+                location.pathname === '/search' ? 'active' : ''
+              }`}
             >
-              <RiDownloadLine />
-            </button>
-          </>
-        )}
+              {location.pathname === '/search' ? (
+                <RiSearchFill />
+              ) : (
+                <RiSearchLine />
+              )}
+              <span>Ara</span>
+            </Link>
 
-        <nav className="header__nav">
-          <Link
-            to="/"
-            className={`header__link ${
-              location.pathname === '/' ? 'active' : ''
-            }`}
-          >
-            <RiHomeLine />
-            <span>Anasayfa</span>
-          </Link>
+            <Link
+              to="/about"
+              className={`header__link ${
+                location.pathname === '/about' ? 'active' : ''
+              }`}
+            >
+              {location.pathname === '/about' ? (
+                <RiInformationFill />
+              ) : (
+                <RiInformationLine />
+              )}
+              <span>Hakkımızda</span>
+            </Link>
 
-          <Link
-            to="/search"
-            className={`header__link ${
-              location.pathname === '/search' ? 'active' : ''
-            }`}
-          >
-            <RiSearchLine />
-            <span>Ara</span>
-          </Link>
-
-          <Link
-            to="/about"
-            className={`header__link ${
-              location.pathname === '/about' ? 'active' : ''
-            }`}
-          >
-            <RiInformationLine />
-            <span>Hakkımızda</span>
-          </Link>
-
-          <Link
-            to="/bookmarks"
-            className={`header__link ${
-              location.pathname === '/bookmarks' ? 'active' : ''
-            }`}
-          >
-            <RiBookmarkLine />
-            <span>Kaydedilenler</span>
-          </Link>
-        </nav>
+            <Link
+              to="/bookmarks"
+              className={`header__link ${
+                location.pathname === '/bookmarks' ? 'active' : ''
+              }`}
+            >
+              {location.pathname === '/bookmarks' ? (
+                <RiBookmarkFill />
+              ) : (
+                <RiBookmarkLine />
+              )}
+              <span>Kaydedilenler</span>
+            </Link>
+          </nav>
+        </div>
       </div>
     </header>
   );
 }
 
 export default Header;
+
