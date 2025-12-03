@@ -13,6 +13,7 @@ function BookmarksPage() {
   const [charts, setCharts] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [layoutType, setLayoutType] = useState('grid'); // grid | compact | list
 
   useEffect(() => {
     const initial = getBookmarkedSymbols();
@@ -92,23 +93,44 @@ function BookmarksPage() {
     [symbols],
   );
 
+  const handleLayoutChange = (event) => {
+    setLayoutType(event.target.value);
+  };
+
+  const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
+
   return (
     <div className="bookmarks-root">
       <header className="bookmarks-header">
         <div>
           <h1 className="bookmarks-title">Kaydedilenler</h1>
-          <p className="bookmarks-subtitle">
-            Favori hisse, fon ve dövizlerinizi tek yerde görün.
-          </p>
+          {/* Eski alt metin kaldırıldı:
+              "Favori hisse, fon ve dövizlerinizi tek yerde görün." */}
         </div>
+
         {symbols.length > 0 && (
-          <button
-            type="button"
-            className="bookmarks-clear-button"
-            onClick={handleClearAll}
-          >
-            Tümünü temizle
-          </button>
+          <div className="bookmarks-actions">
+            <div className="bookmarks-layout-control">
+              <span className="bookmarks-layout-label">Listeleme tipi</span>
+              <select
+                className="bookmarks-layout-select"
+                value={layoutType}
+                onChange={handleLayoutChange}
+              >
+                <option value="grid">Grid</option>
+                <option value="compact">Sıkı grid</option>
+                <option value="list">Liste</option>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              className="bookmarks-clear-button"
+              onClick={handleClearAll}
+            >
+              Tümünü temizle
+            </button>
+          </div>
         )}
       </header>
 
@@ -118,14 +140,8 @@ function BookmarksPage() {
         </div>
       )}
 
-      {!loading && symbols.length === 0 && !error && (
-        <div className="bookmarks-message">
-          <span>
-            Henüz kaydedilmiş bir varlık yok. Detay sayfasındaki
-            işaretleme ikonu ile favorilerinize ekleyebilirsiniz.
-          </span>
-        </div>
-      )}
+      {/* Boş durum mesajı tamamen kaldırıldı:
+          "Henüz kaydedilmiş bir varlık yok..." */}
 
       {loading && (
         <div className="bookmarks-message">
@@ -134,7 +150,7 @@ function BookmarksPage() {
       )}
 
       {!loading && symbols.length > 0 && (
-        <section className="bookmarks-list">
+        <section className={listClassName}>
           {orderedSymbols.map((symbol) => {
             const quote = quotes[symbol];
             const chartData = charts[symbol];
@@ -158,4 +174,3 @@ function BookmarksPage() {
 }
 
 export default BookmarksPage;
-
