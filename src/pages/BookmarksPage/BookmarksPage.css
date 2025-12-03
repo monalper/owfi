@@ -28,7 +28,7 @@
   width: 32px;
   height: 32px;
   border-radius: 999px;
-  border: 1px solid #3a3a3c;
+  border: none; /* border kaldırıldı */
   background: #1c1c1e;
   color: #f5f5f7;
   display: flex;
@@ -38,7 +38,7 @@
 }
 
 .bookmarks-settings-button:hover {
-  border-color: #5a5a5c;
+  background: #2c2c2e;
 }
 
 /* HEADER'DAKİ KAYDET BUTONU (SİLME MODU İÇİN) */
@@ -47,23 +47,24 @@
   height: 32px;
   border-radius: 999px;
   border: none;
-  background: #0a84ff;
-  color: #ffffff;
+  background: #30d158; /* mavi yerine yeşil */
+  color: #000000; /* tik ikonu siyah */
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* tam ortalama */
   cursor: pointer;
+  line-height: 0;
 }
 
 .bookmarks-save-button:hover {
-  background: #0c7ae6;
+  background: #28b04c;
 }
 
 /* CLEAR ALL BUTTON (POPUP İÇİN DE KULLANILIYOR) */
 .bookmarks-clear-button {
   border: none;
-  background: #3a3a3c;
-  color: #f5f5f7;
+  background: #ff3b30; /* kırmızı */
+  color: #ffffff; /* yazı beyaz */
   font-size: 12px;
   padding: 6px 10px;
   border-radius: 999px;
@@ -72,7 +73,7 @@
 }
 
 .bookmarks-clear-button:hover {
-  background: #48484a;
+  background: #ff453a;
 }
 
 /* Messages */
@@ -156,7 +157,7 @@
 .bookmarks-settings-modal {
   background: #1c1c1e;
   border-radius: 16px;
-  border: 1px solid #3a3a3c;
+  /* border kaldırıldı */
   padding: 16px 18px;
   width: 320px;
   max-width: calc(100% - 40px);
@@ -205,7 +206,7 @@
 .bookmarks-settings-layout-button {
   flex: 1;
   border-radius: 999px;
-  border: 1px solid #3a3a3c;
+  border: none; /* border kaldırıldı */
   background: #2c2c2e;
   color: #f5f5f7;
   font-size: 11px;
@@ -214,12 +215,13 @@
 }
 
 .bookmarks-settings-layout-button--active {
-  border-color: #0a84ff;
-  background: #0a84ff33;
+  /* mavi yerine yeşil #30d158 */
+  background: #30d15833;
+  color: #30d158;
 }
 
 .bookmarks-settings-layout-button:hover {
-  border-color: #5a5a5c;
+  background: #3a3a3c;
 }
 
 /* TOGGLE ROW */
@@ -280,8 +282,8 @@
   margin-top: 8px;
   width: 100%;
   border: none;
-  background: #3a3a3c;
-  color: #ff3b30;
+  background: #ff3b30; /* kırmızı */
+  color: #ffffff; /* yazı beyaz */
   font-size: 12px;
   padding: 7px 10px;
   border-radius: 999px;
@@ -289,5 +291,5 @@
 }
 
 .bookmarks-settings-clear-all:hover {
-  background: #48484a;
+  background: #ff453a;
 }
