@@ -5,8 +5,8 @@ const NotFoundPage = () => {
   return (
     <div className="not-found-page">
       <div className="not-found-content">
-        <h1>4💸4</h1>
-        <p>Sayfa bulunamadı.</p>
+        <h1>4🌼4</h1>
+        <p>Aradığın sayfa buralarda değil.</p>
       </div>
     </div>
   );
