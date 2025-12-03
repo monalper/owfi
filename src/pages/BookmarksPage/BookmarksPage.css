@@ -17,49 +17,72 @@
   font-weight: 600;
 }
 
-/* Eski alt başlık metni artık kullanılmıyor ama stil kalabilir.
-.bookmarks-subtitle {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: #e3e3e3;
-  opacity: 0.8;
-}
-*/
-
 .bookmarks-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.bookmarks-layout-control {
+/* DROPDOWN WRAPPER */
+.bookmarks-dropdown-wrapper {
+  position: relative;
+}
+
+/* DROPDOWN BUTTON */
+.bookmarks-dropdown-button {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-}
-
-.bookmarks-layout-label {
-  font-size: 11px;
-  color: #e3e3e3;
-  opacity: 0.9;
-}
-
-.bookmarks-layout-select {
-  border-radius: 999px;
-  border: 1px solid #3a3a3c;
+  align-items: center;
+  gap: 6px;
   background: #1c1c1e;
   color: #f5f5f7;
-  padding: 4px 10px;
+  border: 1px solid #3a3a3c;
+  padding: 6px 12px;
+  padding-right: 28px; /* ikonu sağa yapıştırmamak için */
   font-size: 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  position: relative;
+}
+
+.bookmarks-dropdown-button:hover {
+  border-color: #5a5a5c;
+}
+
+/* ICON */
+.bookmarks-dropdown-icon {
+  position: absolute;
+  right: 10px; /* ikonu sağdan biraz sola aldık */
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* DROPDOWN MENU */
+.bookmarks-dropdown-menu {
+  position: absolute;
+  top: 34px;
+  right: 0;
+  min-width: 120px;
+  background: #1c1c1e;
+  border: 1px solid #3a3a3c;
+  border-radius: 10px;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 5;
+}
+
+.bookmarks-dropdown-item {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #f5f5f7;
   cursor: pointer;
 }
 
-.bookmarks-layout-select:focus {
-  outline: none;
-  border-color: #636366;
+.bookmarks-dropdown-item:hover {
+  background: #2c2c2e;
 }
 
+/* CLEAR BUTTON */
 .bookmarks-clear-button {
   border: none;
   background: #3a3a3c;
@@ -75,6 +98,7 @@
   background: #48484a;
 }
 
+/* Messages */
 .bookmarks-message {
   font-size: 13px;
   color: #e3e3e3;
@@ -84,22 +108,20 @@
   color: #ff3b30;
 }
 
+/* LIST GRID STYLES */
 .bookmarks-list {
   display: grid;
   gap: 10px;
 }
 
-/* Varsayılan “grid” görünümü */
 .bookmarks-list--grid {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
 
-/* Daha sıkı grid görünümü */
 .bookmarks-list--compact {
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
 }
 
-/* Tek sütun liste görünümü */
 .bookmarks-list--list {
   grid-template-columns: minmax(0, 1fr);
 }
