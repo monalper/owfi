@@ -243,17 +243,52 @@ export async function fetchRangeStats(symbol, rangeKey) {
   };
 }
 
-export async function searchSymbols(query) {
-  if (!query || query.length < 2) {
+export async function searchSymbols(query, { limit = 100 } = {}) {
+  const trimmed = String(query ?? '').trim();
+  if (!trimmed) {
     return [];
   }
 
+  const safeLimit =
+    Number.isFinite(limit) && limit > 0 ? Math.min(limit, 200) : 100;
+
   const url = `${API_BASE}/v1/finance/search?q=${encodeURIComponent(
-    query,
-  )}&lang=tr-TR&region=TR&quotesCount=10&newsCount=0`;
+    trimmed,
+  )}&lang=tr-TR&region=TR&quotesCount=${safeLimit}&newsCount=0`;
 
   const json = await fetchWithCache(url);
-  return json?.quotes ?? [];
+  const quotes = Array.isArray(json?.quotes) ? json.quotes : [];
+
+  if (!quotes.length) {
+    return [];
+  }
+
+  const normalizedQuery = trimmed.toLowerCase();
+
+  const scoreQuote = (quote) => {
+    const symbol = String(quote.symbol ?? '').toLowerCase();
+    const shortname = String(quote.shortname ?? '').toLowerCase();
+    const longname = String(quote.longname ?? '').toLowerCase();
+
+    let score = 0;
+
+    if (symbol === normalizedQuery) score += 100;
+    if (shortname === normalizedQuery) score += 90;
+    if (longname === normalizedQuery) score += 90;
+
+    if (shortname.includes(normalizedQuery)) score += 40;
+    if (longname.includes(normalizedQuery)) score += 40;
+
+    if (symbol.startsWith(normalizedQuery)) score += 30;
+
+    return score;
+  };
+
+  const sorted = quotes
+    .slice()
+    .sort((a, b) => scoreQuote(b) - scoreQuote(a));
+
+  return sorted;
 }
 
 export async function fetchCompanyProfile(symbol) {
