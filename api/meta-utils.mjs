@@ -1,6 +1,6 @@
 const DEFAULT_PAGE_TITLE = 'Openwall Finance | Piyasalar';
 const DEFAULT_DESCRIPTION =
-  "Piyasaları Openwall Finance'dan takip edin.";
+  "Piyasaları Openwall Finance'den takip edin.";
 
 const YAHOO_TARGET = 'https://query1.finance.yahoo.com';
 
@@ -72,7 +72,7 @@ async function buildAssetMeta(symbol) {
 
   const name = displayName || symbol;
   const title = `${name} | Openwall Finance`;
-  const description = `${name} için fiyat, grafik ve özet piyasa verileri. Piyasaları Openwall Finance'dan takip edin.`;
+  const description = `${name} için fiyat, grafik ve özet piyasa verileri. Piyasaları Openwall Finance'den takip edin.`;
 
   return { title, description };
 }
