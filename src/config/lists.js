@@ -43,6 +43,27 @@ export const PRESET_LISTS = [
   },
   
   {
+    id: 'tly-içindekiler',
+    title: 'TLY Fonu Hisseleri',
+    emoji: '😎',
+    iconImage: '/listicon/tlyicindekiler.png',
+    description: 'TLY Fonunda yer aldığı bilinen tüm hisseler.',
+    market: 'bist',
+    symbols: [
+      'TEHOL.IS',
+      'TERA.IS',
+      'TRHOL.IS',
+      'DSTKF.IS',
+      'TURSG.IS',
+      'SMRVA.IS',
+      'HEDEF.IS',
+      'PEKGY.IS',
+      'GRTHO.IS',
+      'ADESE.IS'
+    ],
+  },
+
+  {
     id: 'altini-yenen-hisseler',
     title: 'Altını Yenen Hisseler',
     emoji: '✨',
