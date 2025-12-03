@@ -26,6 +26,7 @@
 .not-found-content p {
   margin-top: 0.75rem;
   font-size: 1rem;
-  color: #a1a1a6;
-  font-weight: 300;
+  color: #e3e3e3;   /* Yeni renk */
+  font-weight: 600; /* Semibold */
 }
+
