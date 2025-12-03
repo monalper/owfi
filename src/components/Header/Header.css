@@ -49,6 +49,20 @@
   color: #f5f5f7;
 }
 
+.header__export-button {
+  border: none;
+  background: none;
+  color: #dcdcdc;
+  cursor: pointer;
+  padding: 4px;
+  display: none;
+}
+
+.header__export-button svg {
+  width: 22px;
+  height: 22px;
+}
+
 /* LOGO */
 .header__logo {
   display: flex;
@@ -132,6 +146,14 @@
   }
 
   .header__bookmark-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 48px;
+  }
+
+  .header__export-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;

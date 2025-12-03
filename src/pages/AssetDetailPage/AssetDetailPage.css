@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  position: relative;
 }
 
 /* Genel hata mesajı */
@@ -10,7 +11,44 @@
   font-size: 13px;
 }
 
-/* HEADER – eskisi gibi: solda isim, sağda fiyat */
+/* PNG export için gizli AssetCard kartı + marka banner */
+.asset-detail-export-card {
+  position: absolute;
+  top: -10000px;
+  left: -10000px;
+  width: 320px;
+  background-color: #1d1d1f;
+  border-radius: 18px 18px 0 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.asset-detail-export-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 20px 12px;
+  gap: 8px;
+  background-color: #1d1d1f;
+}
+
+.asset-detail-export-logo {
+  width: 40px;
+  height: auto;
+  display: block;
+}
+
+.asset-detail-export-text {
+  font-size: 14px;
+  color: #f5f5f7;
+}
+
+.asset-detail-export-text-strong {
+  font-weight: 600;
+}
+
+/* HEADER — eskisi gibi: solda isim, sağda fiyat */
 .asset-detail-header {
   display: flex;
   justify-content: space-between;
@@ -189,9 +227,8 @@
   transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
-/* 🔥 Seçili tab beyaz */
 .asset-detail-metrics-tab--active {
-  background-color: #f5f5f7; /* beyaz */
+  background-color: #f5f5f7;
   color: #1d1d1f;
   transform: translateY(-1px);
 }
@@ -200,7 +237,6 @@
   transform: translateY(0);
 }
 
-/* Grid */
 .asset-detail-metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -226,14 +262,58 @@
   font-size: 14px;
 }
 
-/* Genel loading text */
 .asset-detail-loading {
   margin-top: 6px;
   font-size: 13px;
   color: #e3e3e3;
 }
 
-/* Company info */
+.asset-detail-chart-card .asset-detail-loading {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #252525 0%, #2b2b2b 40%, #252525 100%);
+  color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.asset-detail-chart-card .asset-detail-loading::before {
+  content: '';
+  position: absolute;
+  inset: 10px 8px 8px;
+  border-radius: 14px;
+  background: #262626;
+  overflow: hidden;
+}
+
+.asset-detail-chart-card .asset-detail-loading::after {
+  content: '';
+  position: absolute;
+  inset: 10px 8px 8px;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.04) 20%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  animation: asset-detail-chart-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes asset-detail-chart-skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 .asset-detail-company {
   display: flex;
   flex-direction: column;
@@ -277,7 +357,6 @@
   font-size: 13px;
 }
 
-/* News */
 .asset-detail-news {
   display: flex;
   flex-direction: column;
@@ -365,7 +444,6 @@
   text-decoration: underline;
 }
 
-/* Related assets */
 .asset-detail-related {
   display: flex;
   flex-direction: column;
@@ -404,7 +482,6 @@
   color: #e3e3e3;
 }
 
-/* DESKTOP düzenlemeleri */
 @media (min-width: 768px) {
   .asset-detail-root {
     gap: 24px;

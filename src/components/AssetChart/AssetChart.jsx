@@ -10,6 +10,21 @@ import {
 } from 'recharts';
 import './AssetChart.css';
 
+export function AssetChartSkeleton() {
+  return (
+    <div className="asset-chart-root">
+      <div className="asset-chart-skeleton">
+        <div className="asset-chart-skeleton-inner">
+          <div className="asset-chart-skeleton-header" />
+          <div className="asset-chart-skeleton-chart">
+            <div className="asset-chart-skeleton-shimmer" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const percentFormatter = new Intl.NumberFormat('tr-TR', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,

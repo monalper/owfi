@@ -1,28 +1,48 @@
+/* Ana Kapsayıcı */
 .time-toggle-root {
   display: inline-flex;
-  padding: 4px;
+  padding: 4px; /* Orijinal padding */
   border-radius: 999px;
   background-color: #2b2b2b;
   width: 100%;
   justify-content: space-between;
+  position: relative; /* Glider'ı konumlandırmak için şart */
+  isolation: isolate; /* Z-index katmanlarını düzeltir */
 }
 
+/* Kayan Arka Plan (Yeni eklenen kısım) */
+.time-toggle-glider {
+  position: absolute;
+  top: 4px;     /* Root padding'i ile aynı */
+  bottom: 4px;  /* Root padding'i ile aynı */
+  background-color: #f5f5f7;
+  border-radius: 999px;
+  z-index: 1; /* Yazının altında kalsın */
+  transition: left 0.3s ease, width 0.3s ease; /* Kayma animasyonu */
+  pointer-events: none; /* Tıklamayı engellemesin */
+}
+
+/* Butonlar */
 .time-toggle-item {
   border: none;
   outline: none;
   padding: 8px 0;
   border-radius: 999px;
-  background-color: transparent;
+  background-color: transparent; /* Arkaplanı glider halledecek */
   color: #e3e3e3;
   font-size: 13px;
   cursor: pointer;
   flex: 1;
   text-align: center;
+  position: relative;
+  z-index: 2; /* Glider'ın üstünde */
+  transition: color 0.3s ease;
 }
 
+/* Aktif Durum (Sadece yazı rengi) */
 .time-toggle-item-active {
-  background-color: #f5f5f7;
   color: #1d1d1f;
+  /* background-color kaldırıldı, işi glider yapıyor */
 }
 
 @media (min-width: 768px) {
@@ -34,5 +54,6 @@
     flex: 0;
     padding: 5px 12px;
     font-size: 13px;
+    min-width: 40px; /* Çok küçülmemesi için opsiyonel güvenlik */
   }
 }

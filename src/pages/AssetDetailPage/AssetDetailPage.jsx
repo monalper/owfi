@@ -221,7 +221,7 @@ function AssetDetailPage() {
     }
   }, []);
 
-  // Sayfada boş bir yere tıklanınca varsa focus’u temizle
+  // Sayfada boş bir yere tıklanınca varsa focus'u temizle
   useEffect(() => {
     function handlePointerDown(event) {
       const active = document.activeElement;
@@ -270,14 +270,14 @@ function AssetDetailPage() {
       }
     }
 
-      loadQuote();
+    loadQuote();
 
-      return () => {
-        cancelled = true;
-      };
-    }, [symbol]);
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol]);
 
-  // Bookmark durumunu yÇ¬kle
+  // Bookmark durumunu yükle
   useEffect(() => {
     if (!symbol) return;
     setIsBookmarked(isSymbolBookmarked(symbol));
@@ -538,6 +538,32 @@ function AssetDetailPage() {
 
   return (
     <div className="asset-detail-root" ref={pageRef}>
+      {/* Export için AssetCard tasarımlı gizli kart + marka banner */}
+      <div className="asset-detail-export-card" aria-hidden="true">
+        <div className="asset-detail-export-banner">
+          <img
+            src="/logo.svg"
+            alt="Openwall Finance"
+            className="asset-detail-export-logo"
+          />
+          <span className="asset-detail-export-text">
+            <span className="asset-detail-export-text-strong">
+              Openwall Finance
+            </span>{' '}
+            tarafından
+          </span>
+        </div>
+        <AssetCard
+          symbol={symbol}
+          longName={quote?.longName}
+          shortName={quote?.shortName}
+          regularMarketPrice={displayPrice}
+          change={change}
+          changePercent={changePercent}
+          chartData={chartData}
+        />
+      </div>
+
       {error && (
         <div className="asset-detail-error">
           <span>{error}</span>
