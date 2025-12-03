@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+Age: 0
+Cache-Control: public, immutable, no-transform, max-age=31536000
+Content-Length: 0
+Content-Type: image/png
+Date: Wed, 03 Dec 2025 11:21:45 GMT
+Server: Vercel
+Strict-Transport-Security: max-age=63072000
+X-Vercel-Cache: MISS
+X-Vercel-Id: fra1::fra1::2tbbd-1764760905076-1cb4176c9514
+

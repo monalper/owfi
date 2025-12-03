@@ -37,10 +37,29 @@ export default async function handler(req, res) {
     let meta = {
       title: DEFAULT_PAGE_TITLE,
       description: DEFAULT_DESCRIPTION,
+      image: undefined,
     };
 
     if (symbol) {
-      meta = await buildAssetMeta(symbol);
+      const baseMeta = await buildAssetMeta(symbol);
+
+      const baseTitle =
+        baseMeta?.title && typeof baseMeta.title === 'string'
+          ? baseMeta.title
+          : DEFAULT_PAGE_TITLE;
+
+      const nameForImage =
+        baseTitle.replace(/\s*\|\s*Openwall Finance\s*$/i, '') ||
+        String(symbol);
+
+      const ogImageUrl = `https://og-image.vercel.app/${encodeURIComponent(
+        nameForImage,
+      )}.png?theme=dark&md=0&fontSize=72px`;
+
+      meta = {
+        ...baseMeta,
+        image: ogImageUrl,
+      };
     }
 
     const html = patchHtmlWithMeta(baseHtml, meta);
