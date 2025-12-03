@@ -203,6 +203,138 @@
   color: #e3e3e3;
 }
 
+/* Company info */
+.asset-detail-company {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-detail-company-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-detail-company-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.asset-detail-company-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.asset-detail-company-item {
+  border-radius: 16px;
+  background-color: #2b2b2b;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.asset-detail-company-label {
+  font-size: 11px;
+  color: #e3e3e3;
+  opacity: 0.8;
+}
+
+.asset-detail-company-value {
+  font-size: 13px;
+}
+
+/* News */
+.asset-detail-news {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.asset-detail-news-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.asset-detail-news-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.asset-detail-news-empty {
+  font-size: 13px;
+  color: #e3e3e3;
+  opacity: 0.9;
+}
+
+.asset-detail-news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.asset-detail-news-more {
+  margin-top: 8px;
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.asset-detail-news-more-button {
+  border: none;
+  background: transparent;
+  color: #4cd964;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.asset-detail-news-more-button:hover {
+  text-decoration: underline;
+}
+
+.asset-detail-news-yahoo-link {
+  margin-left: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e3e3e3;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.asset-detail-news-yahoo-link:hover {
+  text-decoration: underline;
+}
+
+.asset-detail-news-yahoo-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.asset-detail-news-less-button {
+  border: none;
+  background: transparent;
+  color: #4cd964;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.asset-detail-news-less-button:hover {
+  text-decoration: underline;
+}
+
 /* Related assets */
 .asset-detail-related {
   display: flex;
@@ -274,6 +406,10 @@
   }
 
   .asset-detail-metrics-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .asset-detail-company-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

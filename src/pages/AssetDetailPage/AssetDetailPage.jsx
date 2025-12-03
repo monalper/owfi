@@ -1,11 +1,24 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from 'react';
 import { useParams } from 'react-router-dom';
 import { TbArrowUpRight, TbArrowDownLeft } from 'react-icons/tb';
-import { fetchChart, fetchQuotes, fetchRangeStats } from '../../api/yahooClient.js';
+import {
+  fetchChart,
+  fetchQuotes,
+  fetchRangeStats,
+  fetchCompanyProfile,
+  fetchCompanyNews,
+} from '../../api/yahooClient.js';
+import { FaYahoo } from 'react-icons/fa';
 import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
 import AssetChart from '../../components/AssetChart/AssetChart.jsx';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
 import TimeRangeToggle from '../../components/TimeRangeToggle/TimeRangeToggle.jsx';
+import NewsCard from '../../components/NewsCard/NewsCard.jsx';
 import './AssetDetailPage.css';
 
 const priceFormatter = new Intl.NumberFormat('tr-TR', {
@@ -19,8 +32,8 @@ const percentFormatter = new Intl.NumberFormat('tr-TR', {
 });
 
 function RelatedAssetsSection({ symbol }) {
-  const [quotes, setQuotes] = useState({});
-  const [charts, setCharts] = useState({});
+  const [quotesBySymbol, setQuotesBySymbol] = useState({});
+  const [chartsBySymbol, setChartsBySymbol] = useState({});
   const [loading, setLoading] = useState(false);
 
   const relatedSymbols = useMemo(() => {
@@ -68,8 +81,8 @@ function RelatedAssetsSection({ symbol }) {
 
     async function loadRelated() {
       if (!relatedSymbols.length) {
-        setQuotes({});
-        setCharts({});
+        setQuotesBySymbol({});
+        setChartsBySymbol({});
         return;
       }
 
@@ -79,13 +92,13 @@ function RelatedAssetsSection({ symbol }) {
         const quotesArray = await fetchQuotes(relatedSymbols);
         if (cancelled) return;
 
-        const bySymbol = {};
+        const nextQuotes = {};
         quotesArray.forEach((item) => {
           if (item && item.symbol) {
-            bySymbol[item.symbol] = item;
+            nextQuotes[item.symbol] = item;
           }
         });
-        setQuotes(bySymbol);
+        setQuotesBySymbol(nextQuotes);
 
         const chartEntries = await Promise.all(
           relatedSymbols.map(async (relatedSymbol) => {
@@ -100,14 +113,14 @@ function RelatedAssetsSection({ symbol }) {
 
         if (cancelled) return;
 
-        const chartsBySymbol = {};
+        const nextCharts = {};
         chartEntries.forEach(([relatedSymbol, data]) => {
-          chartsBySymbol[relatedSymbol] = data;
+          nextCharts[relatedSymbol] = data;
         });
-        setCharts(chartsBySymbol);
-      } catch (err) {
+        setChartsBySymbol(nextCharts);
+      } catch {
         if (!cancelled) {
-          // sessizce yut, ana hata mesajlarını bozma
+          // Sessiz yut, ana hatayı bozmamak için
         }
       } finally {
         if (!cancelled) {
@@ -130,19 +143,19 @@ function RelatedAssetsSection({ symbol }) {
   return (
     <section className="asset-detail-related">
       <div className="asset-detail-related-header">
-        <h2 className="asset-detail-related-title"></h2>
+        <h2 className="asset-detail-related-title" />
       </div>
       <div className="asset-detail-related-list">
         {relatedSymbols.map((relatedSymbol) => {
-          const directQuote = quotes[relatedSymbol];
+          const directQuote = quotesBySymbol[relatedSymbol];
           const normalizedQuote =
             directQuote ||
-            Object.values(quotes).find(
+            Object.values(quotesBySymbol).find(
               (item) =>
                 item?.symbol &&
                 item.symbol.toUpperCase() === relatedSymbol.toUpperCase(),
             );
-          const chartDataForSymbol = charts[relatedSymbol];
+          const chartDataForSymbol = chartsBySymbol[relatedSymbol];
 
           return (
             <AssetCard
@@ -160,7 +173,7 @@ function RelatedAssetsSection({ symbol }) {
       </div>
       {loading && (
         <div className="asset-detail-related-loading">
-          <span>İlişkili hisseler yükleniyor…</span>
+          <span>İlgili varlıklar yükleniyor…</span>
         </div>
       )}
     </section>
@@ -178,14 +191,19 @@ function AssetDetailPage() {
   const [loadingChart, setLoadingChart] = useState(true);
   const [error, setError] = useState(null);
 
-  // Özet Bilgiler sekmeleri için
-  const [metricsTab, setMetricsTab] = useState('daily'); // 'daily' | '52w'
+  const [companyProfile, setCompanyProfile] = useState(null);
+  const [companyProfileLoading, setCompanyProfileLoading] = useState(false);
+  const [companyNews, setCompanyNews] = useState([]);
+  const [companyNewsLoading, setCompanyNewsLoading] = useState(false);
+  const [showAllNews, setShowAllNews] = useState(false);
 
-  // Focus / tıklanma efektlerini temizlemek için ref
+  // Özet Bilgiler / Şirket sekmeleri için
+  const [metricsTab, setMetricsTab] = useState('daily'); // 'daily' | '52w' | 'company'
+
   const pageRef = useRef(null);
   const chartContainerRef = useRef(null);
 
-  // Sayfa yüklendiğinde grafik alanı otomatik seçili gelmesin diye
+  // Sayfa ilk yüklendiğinde grafik alanı otomatik seçili gelmesin
   useEffect(() => {
     const active = document.activeElement;
     if (
@@ -197,19 +215,17 @@ function AssetDetailPage() {
     }
   }, []);
 
-  // Dışarı tıklanınca varsa focus/tıklanma efektini temizle
+  // Sayfada boş bir yere tıklanınca varsa focus’u temizle
   useEffect(() => {
     function handlePointerDown(event) {
       const active = document.activeElement;
 
       if (!active || active === document.body) return;
 
-      // Tıklanan yer aktif elementin içindeyse dokunma
       if (active instanceof HTMLElement && active.contains(event.target)) {
         return;
       }
 
-      // Sayfa içinde focuslanmış bir şey varsa blurluyoruz
       if (
         active instanceof HTMLElement &&
         pageRef.current &&
@@ -225,19 +241,26 @@ function AssetDetailPage() {
     };
   }, []);
 
+  // Fiyat / temel quote verisi
   useEffect(() => {
     let cancelled = false;
 
     async function loadQuote() {
+      if (!symbol) return;
+
       try {
         setLoadingQuote(true);
         const result = await fetchQuotes([symbol]);
         if (cancelled) return;
         setQuote(result[0] || null);
       } catch (err) {
-        if (!cancelled) setError(err.message || 'Varlık bilgisi alınamadı.');
+        if (!cancelled) {
+          setError(err.message || 'Varlık bilgisi alınamadı.');
+        }
       } finally {
-        if (!cancelled) setLoadingQuote(false);
+        if (!cancelled) {
+          setLoadingQuote(false);
+        }
       }
     }
 
@@ -248,19 +271,92 @@ function AssetDetailPage() {
     };
   }, [symbol]);
 
+  // Şirket profili
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCompanyProfile() {
+      if (!symbol) {
+        setCompanyProfile(null);
+        return;
+      }
+
+      try {
+        setCompanyProfileLoading(true);
+        const profile = await fetchCompanyProfile(symbol);
+        if (cancelled) return;
+        setCompanyProfile(profile);
+      } catch {
+        if (!cancelled) {
+          setCompanyProfile(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setCompanyProfileLoading(false);
+        }
+      }
+    }
+
+    loadCompanyProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol]);
+
+  // Şirket haberleri
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadCompanyNews() {
+      if (!symbol) {
+        setCompanyNews([]);
+        return;
+      }
+
+      try {
+        setCompanyNewsLoading(true);
+        const news = await fetchCompanyNews(symbol, { count: 6 });
+        if (cancelled) return;
+        setCompanyNews(news);
+      } catch {
+        if (!cancelled) {
+          setCompanyNews([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setCompanyNewsLoading(false);
+        }
+      }
+    }
+
+    loadCompanyNews();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol]);
+
+  // Grafik verisi
   useEffect(() => {
     let cancelled = false;
 
     async function loadChart() {
+      if (!symbol) return;
+
       try {
         setLoadingChart(true);
         const data = await fetchChart(symbol, rangeKey);
         if (cancelled) return;
         setChartData(data);
       } catch (err) {
-        if (!cancelled) setError(err.message || 'Grafik verisi alınamadı.');
+        if (!cancelled) {
+          setError(err.message || 'Grafik verisi alınamadı.');
+        }
       } finally {
-        if (!cancelled) setLoadingChart(false);
+        if (!cancelled) {
+          setLoadingChart(false);
+        }
       }
     }
 
@@ -271,7 +367,7 @@ function AssetDetailPage() {
     };
   }, [symbol, rangeKey]);
 
-  // Seçilen tarih aralığına göre ilk/son fiyat ve yüzde değişimini hesapla
+  // Seçilen tarih aralığına göre özet istatistik
   useEffect(() => {
     let cancelled = false;
 
@@ -287,7 +383,7 @@ function AssetDetailPage() {
         const stats = await fetchRangeStats(symbol, rangeKey);
         if (cancelled) return;
         setRangeStats(stats);
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setRangeStats(null);
         }
@@ -311,11 +407,8 @@ function AssetDetailPage() {
     displaySymbol = 'Gümüş';
   }
 
-  // Header fiyat/değişim: her zaman günlük (Yahoo header ile aynı)
   const isDailyRange = rangeKey === '1G';
 
-  // 1G: Yahoo'nun günlük değişimini kullan
-  // Diğer aralıklar: chartData'dan hesaplanan değişimi kullan (fallback: günlük)
   const displayPrice = (() => {
     if (isDailyRange) {
       return typeof quote?.regularMarketPrice === 'number'
@@ -368,10 +461,10 @@ function AssetDetailPage() {
   const isNegative = typeof change === 'number' && change < 0;
 
   const formatPriceOrDash = (val) =>
-    typeof val === 'number' ? priceFormatter.format(val) : '—';
+    typeof val === 'number' ? priceFormatter.format(val) : '--';
 
   const formatIntOrDash = (val) =>
-    typeof val === 'number' ? val.toLocaleString('tr-TR') : '—';
+    typeof val === 'number' ? val.toLocaleString('tr-TR') : '--';
 
   const metricsDaily = [
     {
@@ -410,6 +503,20 @@ function AssetDetailPage() {
   ];
 
   const currentMetrics = metricsTab === 'daily' ? metricsDaily : metrics52w;
+  const showMetricsGrid = metricsTab === 'daily' || metricsTab === '52w';
+  const showCompanyTab = metricsTab === 'company';
+
+  const newsUrl =
+    symbol && typeof symbol === 'string'
+      ? `https://finance.yahoo.com/quote/${encodeURIComponent(
+          symbol,
+        )}/news?p=${encodeURIComponent(symbol)}`
+      : null;
+
+  const visibleNews =
+    showAllNews || !Array.isArray(companyNews)
+      ? companyNews
+      : companyNews.slice(0, 2);
 
   return (
     <div className="asset-detail-root" ref={pageRef}>
@@ -432,7 +539,7 @@ function AssetDetailPage() {
           <div className="asset-detail-price">
             {typeof displayPrice === 'number'
               ? priceFormatter.format(displayPrice)
-              : '—'}
+              : '--'}
           </div>
           <div className="asset-detail-change-row">
             {isPositive && (
@@ -458,7 +565,7 @@ function AssetDetailPage() {
               </>
             )}
             {!isPositive && !isNegative && (
-              <span className="asset-detail-change-muted">—</span>
+              <span className="asset-detail-change-muted">--</span>
             )}
           </div>
         </div>
@@ -466,7 +573,7 @@ function AssetDetailPage() {
 
       <section className="asset-detail-chart-section">
         <div className="asset-detail-chart-header">
-          <h2 className="asset-detail-chart-title"></h2>
+          <h2 className="asset-detail-chart-title" />
           <div className="asset-detail-chart-toggle-desktop">
             <TimeRangeToggle value={rangeKey} onChange={setRangeKey} />
           </div>
@@ -484,10 +591,11 @@ function AssetDetailPage() {
 
       <section className="asset-detail-metrics">
         <div className="asset-detail-metrics-header">
-          <h2 className="asset-detail-metrics-title"></h2>
+          <h2 className="asset-detail-metrics-title">
+            {metricsTab === 'company' ? 'Şirket Detayları' : 'Özet Bilgiler'}
+          </h2>
         </div>
 
-        {/* Tab navbar */}
         <div className="asset-detail-metrics-tabs">
           <button
             type="button"
@@ -507,17 +615,146 @@ function AssetDetailPage() {
           >
             52 Hafta
           </button>
+          <button
+            type="button"
+            className={`asset-detail-metrics-tab ${
+              metricsTab === 'company'
+                ? 'asset-detail-metrics-tab--active'
+                : ''
+            }`}
+            onClick={() => setMetricsTab('company')}
+          >
+            Şirket
+          </button>
         </div>
 
-        <div className="asset-detail-metrics-grid">
-          {currentMetrics.map((metric) => (
-            <div key={metric.key} className="asset-detail-metric">
-              <span className="asset-detail-metric-label">{metric.label}</span>
-              <span className="asset-detail-metric-value">{metric.value}</span>
-            </div>
-          ))}
-        </div>
+        {showMetricsGrid && (
+          <div className="asset-detail-metrics-grid">
+            {currentMetrics.map((metric) => (
+              <div key={metric.key} className="asset-detail-metric">
+                <span className="asset-detail-metric-label">
+                  {metric.label}
+                </span>
+                <span className="asset-detail-metric-value">
+                  {metric.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {showCompanyTab && (companyProfile || companyProfileLoading) && (
+          <div className="asset-detail-company">
+            {companyProfileLoading && !companyProfile && (
+              <div className="asset-detail-loading">
+                Şirket bilgileri yükleniyor…
+              </div>
+            )}
+            {companyProfile && (
+              <div className="asset-detail-company-grid">
+                {(companyProfile.exchangeDisplay ||
+                  companyProfile.exchange) && (
+                  <div className="asset-detail-company-item">
+                    <span className="asset-detail-company-label">Borsa</span>
+                    <span className="asset-detail-company-value">
+                      {companyProfile.exchangeDisplay ||
+                        companyProfile.exchange}
+                    </span>
+                  </div>
+                )}
+                {(companyProfile.sector || companyProfile.industry) && (
+                  <div className="asset-detail-company-item">
+                    <span className="asset-detail-company-label">
+                      Sektör / Endüstri
+                    </span>
+                    <span className="asset-detail-company-value">
+                      {companyProfile.sector}
+                      {companyProfile.sector && companyProfile.industry
+                        ? ' • '
+                        : ''}
+                      {companyProfile.industry}
+                    </span>
+                  </div>
+                )}
+                {(companyProfile.typeDisplay || companyProfile.quoteType) && (
+                  <div className="asset-detail-company-item">
+                    <span className="asset-detail-company-label">
+                      Varlık Tipi
+                    </span>
+                    <span className="asset-detail-company-value">
+                      {companyProfile.typeDisplay || companyProfile.quoteType}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </section>
+
+      {(companyNewsLoading || (companyNews && companyNews.length > 0)) && (
+        <section className="asset-detail-news">
+          <div className="asset-detail-news-header">
+            <h2 className="asset-detail-news-title">Şirket Haberleri</h2>
+          </div>
+          {companyNewsLoading && (
+            <div className="asset-detail-loading">Haberler yükleniyor…</div>
+          )}
+          {!companyNewsLoading && companyNews && companyNews.length === 0 && (
+            <div className="asset-detail-news-empty">
+              <span>Şu anda görüntülenecek haber bulunamadı.</span>
+            </div>
+          )}
+          {!companyNewsLoading && companyNews && companyNews.length > 0 && (
+            <>
+              <div className="asset-detail-news-list">
+                {visibleNews.map((item) => (
+                  <NewsCard
+                    key={item.id}
+                    title={item.title}
+                    publisher={item.publisher}
+                    publishedAt={item.publishedAt}
+                    thumbnailUrl={item.thumbnailUrl}
+                  />
+                ))}
+              </div>
+              <div className="asset-detail-news-more">
+                {!showAllNews && companyNews.length > 2 && (
+                  <button
+                    type="button"
+                    className="asset-detail-news-more-button"
+                    onClick={() => setShowAllNews(true)}
+                  >
+                    Daha fazla haber
+                  </button>
+                )}
+                {showAllNews && newsUrl && (
+                  <>
+                    <a
+                      href={newsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="asset-detail-news-yahoo-link"
+                    >
+                      <FaYahoo className="asset-detail-news-yahoo-icon" />
+                      <span>Yahoo&apos;da devam et</span>
+                    </a>
+                    {companyNews.length > 2 && (
+                      <button
+                        type="button"
+                        className="asset-detail-news-less-button"
+                        onClick={() => setShowAllNews(false)}
+                      >
+                        Daha az haber
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </section>
+      )}
 
       <RelatedAssetsSection symbol={symbol} />
 

@@ -255,3 +255,73 @@ export async function searchSymbols(query) {
   const json = await fetchWithCache(url);
   return json?.quotes ?? [];
 }
+
+export async function fetchCompanyProfile(symbol) {
+  if (!symbol) return null;
+
+  const url = `${API_BASE}/v1/finance/search?q=${encodeURIComponent(
+    symbol,
+  )}&lang=tr-TR&region=TR&quotesCount=1&newsCount=0`;
+
+  const json = await fetchWithCache(url);
+  const quote = json?.quotes?.[0];
+
+  if (!quote) {
+    return null;
+  }
+
+  return {
+    symbol: quote.symbol,
+    shortName: quote.shortname,
+    longName: quote.longname,
+    exchange: quote.exchange,
+    exchangeDisplay: quote.exchDisp,
+    sector: quote.sectorDisp || quote.sector,
+    industry: quote.industryDisp || quote.industry,
+    quoteType: quote.quoteType,
+    typeDisplay: quote.typeDisp,
+  };
+}
+
+export async function fetchCompanyNews(symbol, { count = 6 } = {}) {
+  if (!symbol) return [];
+
+  const safeCount = Number.isFinite(count) && count > 0 ? count : 6;
+
+  const url = `${API_BASE}/v1/finance/search?q=${encodeURIComponent(
+    symbol,
+  )}&lang=en-US&region=US&quotesCount=0&newsCount=${safeCount}`;
+
+  const json = await fetchWithCache(url);
+  const items = Array.isArray(json?.news) ? json.news : [];
+
+  const upperSymbol = String(symbol).toUpperCase();
+  const baseSymbol = upperSymbol.replace(/\.IS$/i, '');
+
+  const filtered = items.filter((item) => {
+    const tickersRaw = item && Array.isArray(item.relatedTickers)
+      ? item.relatedTickers
+      : [];
+
+    const tickers = tickersRaw.map((t) => String(t).toUpperCase());
+
+    if (tickers.includes(upperSymbol)) return true;
+    if (baseSymbol && tickers.includes(baseSymbol)) return true;
+
+    return false;
+  });
+
+  const finalItems = filtered;
+
+  return finalItems.map((item) => ({
+    id: item.uuid || item.link || `${item.title}-${item.publisher}`,
+    title: item.title,
+    publisher: item.publisher,
+    link: item.link,
+    publishedAt: item.providerPublishTime
+      ? new Date(item.providerPublishTime * 1000)
+      : null,
+    thumbnailUrl: item.thumbnail?.resolutions?.[0]?.url || null,
+    type: item.type,
+  }));
+}
