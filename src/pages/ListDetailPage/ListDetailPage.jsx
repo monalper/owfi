@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { PRESET_LISTS } from '../../config/lists.js';
 import { fetchQuotes, fetchChart } from '../../api/yahooClient.js';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
+import { usePageMetaTitle } from '../../utils/pageMeta.js';
 import './ListDetailPage.css';
 
 function ListDetailPage() {
@@ -80,6 +81,12 @@ function ListDetailPage() {
       cancelled = true;
     };
   }, [list, symbols]);
+
+  const pageTitle = list?.title
+    ? `${list.title} | Openwall Finance`
+    : 'Listeler | Openwall Finance';
+
+  usePageMetaTitle(pageTitle);
 
   if (!list) {
     return (

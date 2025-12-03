@@ -3,6 +3,7 @@ import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
 import { fetchQuotes, fetchChart } from '../../api/yahooClient.js';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
 import BistIndexBanner from '../../components/BistIndexBanner/BistIndexBanner.jsx';
+import { usePageMetaTitle } from '../../utils/pageMeta.js';
 import './HomePage.css';
 
 function HomePage() {
@@ -16,6 +17,8 @@ function HomePage() {
     () => [...new Set(WATCHLIST_GROUPS.flatMap((group) => group.symbols))],
     [],
   );
+
+  usePageMetaTitle('Openwall Finance | Piyasalar');
 
   useEffect(() => {
     let cancelled = false;

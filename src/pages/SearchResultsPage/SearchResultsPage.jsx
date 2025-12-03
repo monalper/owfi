@@ -4,6 +4,7 @@ import { searchSymbols } from '../../api/yahooClient.js';
 import SearchBar from '../../components/SearchBar/SearchBar.jsx';
 import ListCard from '../../components/ListCard/ListCard.jsx';
 import { PRESET_LISTS } from '../../config/lists.js';
+import { usePageMetaTitle } from '../../utils/pageMeta.js';
 import './SearchResultsPage.css';
 
 const PAGE_SIZE = 20;
@@ -47,6 +48,13 @@ function SearchResultsPage() {
   const [showAllLists, setShowAllLists] = useState(false);
   const [gliderStyle, setGliderStyle] = useState({ left: 0, width: 0 });
   const tabRefs = useRef({});
+
+  const trimmedQuery = query.trim();
+  const pageTitle = trimmedQuery
+    ? `${trimmedQuery} | Openwall Finance`
+    : 'Arama | Openwall Finance';
+
+  usePageMetaTitle(pageTitle);
 
   useEffect(() => {
     let cancelled = false;

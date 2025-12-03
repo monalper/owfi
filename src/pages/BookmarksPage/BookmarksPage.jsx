@@ -6,6 +6,7 @@ import {
   setBookmarkedSymbols,
 } from '../../utils/bookmarksStorage.js';
 import { FaTrash } from 'react-icons/fa';
+import { usePageMetaTitle } from '../../utils/pageMeta.js';
 
 import './BookmarksPage.css';
 
@@ -19,6 +20,8 @@ function BookmarksPage() {
   const [layoutType, setLayoutType] = useState('grid'); // grid | compact | list
   const [deleteMode, setDeleteMode] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  usePageMetaTitle('Kaydedilenler | Openwall Finance');
 
   useEffect(() => {
     const initial = getBookmarkedSymbols();
@@ -313,4 +316,3 @@ function BookmarksPage() {
 }
 
 export default BookmarksPage;
-

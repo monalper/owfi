@@ -24,6 +24,7 @@ import {
   isSymbolBookmarked,
   toggleSymbolBookmark,
 } from '../../utils/bookmarksStorage.js';
+import { usePageMetaTitle } from '../../utils/pageMeta.js';
 import './AssetDetailPage.css';
 
 const priceFormatter = new Intl.NumberFormat('tr-TR', {
@@ -535,6 +536,26 @@ function AssetDetailPage() {
     const next = toggleSymbolBookmark(symbol);
     setIsBookmarked(next);
   };
+
+  const assetName =
+    quote?.longName ||
+    quote?.shortName ||
+    (() => {
+      const rawSymbol = symbol || '';
+      const upperSymbol = rawSymbol.toUpperCase();
+      if (!upperSymbol) return '';
+
+      if (upperSymbol === 'XAUUSD=X') return 'Altın';
+      if (upperSymbol === 'XAGUSD=X') return 'Gümüş';
+
+      return upperSymbol.replace(/\.IS$/i, '');
+    })();
+
+  const pageTitle = assetName
+    ? `${assetName} | Openwall Finance`
+    : 'Openwall Finance | Piyasalar';
+
+  usePageMetaTitle(pageTitle);
 
   return (
     <div className="asset-detail-root" ref={pageRef}>
