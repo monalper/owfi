@@ -171,6 +171,7 @@ function Header() {
           )}
 
           <button className="header__logo" onClick={handleLogoClick}>
+            <span className="header__logo--light">openwall</span>
             <img src="/logo.svg" alt="logo" className="header__logo-img" />
             <span className="header__logo--light">finance</span>
           </button>
@@ -289,4 +290,3 @@ function Header() {
 }
 
 export default Header;
-
