@@ -7,6 +7,7 @@ import {
 } from '../../utils/bookmarksStorage.js';
 
 import { IoMdSettings } from 'react-icons/io';
+import { FaTrash } from 'react-icons/fa';
 
 import './BookmarksPage.css';
 
@@ -108,15 +109,33 @@ function BookmarksPage() {
 
   const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
 
-  const openSettings = () => setIsSettingsOpen(true);
+  const openSettings = () => {
+    // popup açılırken silme modu kapalı olsun
+    setDeleteMode(false);
+    setIsSettingsOpen(true);
+  };
+
   const closeSettings = () => setIsSettingsOpen(false);
 
   const handleToggleDeleteMode = () => {
-    setDeleteMode((prev) => !prev);
+    setDeleteMode((prev) => {
+      const next = !prev;
+      // silme modu açılırken popup kapansın
+      if (next) {
+        setIsSettingsOpen(false);
+      }
+      return next;
+    });
   };
 
   const handleSelectLayout = (type) => {
     setLayoutType(type);
+  };
+
+  const handleSaveClick = () => {
+    // sağ alttaki kaydet: popup geri açılsın, silme modu kapalı olsun
+    setDeleteMode(false);
+    setIsSettingsOpen(true);
   };
 
   return (
@@ -166,7 +185,7 @@ function BookmarksPage() {
                     className="bookmarks-item-delete-button"
                     onClick={() => handleDeleteSymbol(symbol)}
                   >
-                    ×
+                    <FaTrash />
                   </button>
                 )}
                 <AssetCard
@@ -274,6 +293,17 @@ function BookmarksPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* SAĞ ALTA KAYDET BUTONU: sadece tek tek silme modu açıkken */}
+      {deleteMode && (
+        <button
+          type="button"
+          className="bookmarks-save-fab"
+          onClick={handleSaveClick}
+        >
+          Kaydet
+        </button>
       )}
     </div>
   );
