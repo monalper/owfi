@@ -41,6 +41,7 @@ async function buildAssetMeta(symbol) {
       price: undefined,
       change: undefined,
       changePercent: undefined,
+      currency: undefined,
     };
   }
 
@@ -48,6 +49,7 @@ async function buildAssetMeta(symbol) {
   let price;
   let change;
   let changePercent;
+  let currency;
 
   try {
     const targetUrl = `${YAHOO_TARGET}/v8/finance/chart/${encodeURIComponent(
@@ -85,6 +87,25 @@ async function buildAssetMeta(symbol) {
         change = price - previousClose;
         changePercent = (change / previousClose) * 100;
       }
+
+      const rawCurrency = meta.currency || meta.currencySymbol || null;
+
+      if (typeof rawCurrency === 'string' && rawCurrency.trim() !== '') {
+        const trimmed = rawCurrency.trim();
+        if (trimmed.length === 3) {
+          currency = trimmed.toUpperCase();
+        } else if (trimmed === '₺') {
+          currency = 'TRY';
+        } else if (trimmed === '$') {
+          currency = 'USD';
+        } else if (trimmed === '€') {
+          currency = 'EUR';
+        } else if (trimmed === '£') {
+          currency = 'GBP';
+        } else {
+          currency = trimmed.toUpperCase();
+        }
+      }
     }
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -95,7 +116,7 @@ async function buildAssetMeta(symbol) {
   const title = `${name} | Openwall Finance`;
   const description = `${name} için fiyat, grafik ve özet piyasa verileri. Piyasaları Openwall Finance'den takip edin.`;
 
-  return { title, description, price, change, changePercent };
+  return { title, description, price, change, changePercent, currency };
 }
 
 function patchHtmlWithMeta(html, { title, description, image }) {
@@ -157,3 +178,4 @@ export {
   patchHtmlWithMeta,
   normalizeAssetSymbol,
 };
+
