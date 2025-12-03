@@ -6,21 +6,34 @@
 
 .list-detail-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 12px;
   margin-bottom: 4px;
 }
 
+.list-detail-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
 .list-detail-icon-wrapper {
   flex: 0 0 auto;
-  width: 46px;
-  height: 46px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #1f1f21;
+  background: radial-gradient(
+    circle at 20% 0%,
+    rgba(255, 255, 255, 0.2),
+    transparent 55%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .list-detail-icon {
@@ -51,6 +64,26 @@
   font-size: 13px;
   color: #e3e3e3;
   opacity: 0.9;
+}
+
+.list-detail-bookmark-button {
+  border: none;
+  background: transparent;
+  color: #e3e3e3;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.list-detail-bookmark-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.list-detail-bookmark-button--active .list-detail-bookmark-icon {
+  color: #ffcc00;
 }
 
 .list-detail-list {

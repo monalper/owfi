@@ -1,17 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
+import SavedListCard from '../../components/SavedListCard/SavedListCard.jsx';
 import { fetchChart, fetchQuotes } from '../../api/yahooClient.js';
+import { PRESET_LISTS } from '../../config/lists.js';
 import {
   getBookmarkedSymbols,
   setBookmarkedSymbols,
 } from '../../utils/bookmarksStorage.js';
+import {
+  getBookmarkedListIds,
+  setBookmarkedListIds,
+} from '../../utils/listBookmarksStorage.js';
 import { FaTrash } from 'react-icons/fa';
 import { usePageMetaTitle } from '../../utils/pageMeta.js';
 
 import './BookmarksPage.css';
 
 function BookmarksPage() {
-  const [symbols, setSymbols] = useState([]);
+  const [assetSymbols, setAssetSymbols] = useState([]);
+  const [listIds, setListIds] = useState([]);
   const [quotes, setQuotes] = useState({});
   const [charts, setCharts] = useState({});
   const [loading, setLoading] = useState(true);
@@ -24,15 +31,20 @@ function BookmarksPage() {
   usePageMetaTitle('Kaydedilenler | Openwall Finance');
 
   useEffect(() => {
-    const initial = getBookmarkedSymbols();
-    setSymbols(initial);
+    const initialAssets = getBookmarkedSymbols();
+    const initialLists = getBookmarkedListIds();
+    setAssetSymbols(initialAssets);
+    setListIds(initialLists);
   }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
-      if (!symbols.length) {
+      const hasAnyBookmarks =
+        assetSymbols.length > 0 || listIds.length > 0;
+
+      if (!hasAnyBookmarks) {
         setQuotes({});
         setCharts({});
         setLoading(false);
@@ -44,7 +56,23 @@ function BookmarksPage() {
         setLoading(true);
         setError(null);
 
-        const result = await fetchQuotes(symbols);
+        const listSymbols = PRESET_LISTS
+          .filter((item) => listIds.includes(item.id))
+          .flatMap((item) => item.symbols || []);
+
+        const allSymbols = Array.from(
+          new Set([...assetSymbols, ...listSymbols]),
+        );
+
+        if (!allSymbols.length) {
+          setQuotes({});
+          setCharts({});
+          setLoading(false);
+          setError(null);
+          return;
+        }
+
+        const result = await fetchQuotes(allSymbols);
         if (cancelled) return;
 
         const bySymbol = {};
@@ -56,7 +84,7 @@ function BookmarksPage() {
         setQuotes(bySymbol);
 
         const chartEntries = await Promise.all(
-          symbols.map(async (symbol) => {
+          assetSymbols.map(async (symbol) => {
             try {
               const data = await fetchChart(symbol, '1G');
               return [symbol, data];
@@ -75,7 +103,7 @@ function BookmarksPage() {
         setCharts(bySymbolCharts);
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || 'Kaydedilenler yüklenirken hata oluştu.');
+          setError(err.message || 'Kaydedilenler yüklenirken bir hata oluştu.');
         }
       } finally {
         if (!cancelled) {
@@ -89,7 +117,7 @@ function BookmarksPage() {
     return () => {
       cancelled = true;
     };
-  }, [symbols]);
+  }, [assetSymbols, listIds]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -124,19 +152,35 @@ function BookmarksPage() {
 
   const handleClearAll = () => {
     setBookmarkedSymbols([]);
-    setSymbols([]);
+    setBookmarkedListIds([]);
+    setAssetSymbols([]);
+    setListIds([]);
     setDeleteMode(false);
   };
 
   const handleDeleteSymbol = (symbol) => {
-    const updated = symbols.filter((s) => s !== symbol);
+    const updated = assetSymbols.filter((s) => s !== symbol);
     setBookmarkedSymbols(updated);
-    setSymbols(updated);
+    setAssetSymbols(updated);
+  };
+
+  const handleDeleteList = (listId) => {
+    const updated = listIds.filter((id) => id !== listId);
+    setBookmarkedListIds(updated);
+    setListIds(updated);
   };
 
   const orderedSymbols = useMemo(
-    () => symbols.slice().sort((a, b) => a.localeCompare(b)),
-    [symbols],
+    () => assetSymbols.slice().sort((a, b) => a.localeCompare(b)),
+    [assetSymbols],
+  );
+
+  const bookmarkedLists = useMemo(
+    () =>
+      listIds
+        .map((id) => PRESET_LISTS.find((item) => item.id === id))
+        .filter(Boolean),
+    [listIds],
   );
 
   const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
@@ -162,7 +206,7 @@ function BookmarksPage() {
   return (
     <div className="bookmarks-root">
       <header className="bookmarks-header">
-        <h1 className="bookmarks-title">Kaydedilenler</h1>
+        <h1 className="bookmarks-title"></h1>
       </header>
 
       {error && (
@@ -173,11 +217,42 @@ function BookmarksPage() {
 
       {loading && (
         <div className="bookmarks-message">
-          <span>Kaydedilenler yükleniyor…</span>
+          <span>Kaydedilenler yükleniyor...</span>
         </div>
       )}
 
-      {!loading && symbols.length > 0 && (
+      {!loading && bookmarkedLists.length > 0 && (
+        <section className="bookmarks-lists-section">
+          <h2 className="bookmarks-lists-title"></h2>
+          <div className="bookmarks-lists-grid">
+            {bookmarkedLists.map((list) => (
+              <div
+                key={list.id}
+                className={`bookmarks-item-wrapper${
+                  deleteMode ? ' bookmarks-item-wrapper--deleting' : ''
+                }`}
+              >
+                {deleteMode && (
+                  <>
+                    <button
+                      type="button"
+                      className="bookmarks-item-delete-button"
+                      onClick={() => handleDeleteList(list.id)}
+                      aria-label={`${list.title} kaydını sil`}
+                    >
+                      <FaTrash />
+                    </button>
+                    <div className="bookmarks-item-blocker" />
+                  </>
+                )}
+                <SavedListCard list={list} quotesBySymbol={quotes} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {!loading && assetSymbols.length > 0 && (
         <section className={listClassName}>
           {orderedSymbols.map((symbol) => {
             const quote = quotes[symbol];
@@ -268,7 +343,7 @@ function BookmarksPage() {
                   }`}
                   onClick={() => handleSelectLayout('compact')}
                 >
-                  Sıkı Grid
+                  Sıkı grid
                 </button>
                 <button
                   type="button"
@@ -316,3 +391,4 @@ function BookmarksPage() {
 }
 
 export default BookmarksPage;
+

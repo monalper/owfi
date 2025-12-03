@@ -139,7 +139,7 @@
 @media (max-width: 600px) {
   .header__content {
     padding: 26px 16px;
-    justify-content: center;
+    justify-content: center; /* default: logo ortada */
     position: relative;
   }
 
@@ -211,7 +211,7 @@
     z-index: 1000;
   }
 
-  /* Link Yapısı */
+  /* Link yapısı */
   .header__link {
     flex-direction: column;
     padding: 10px;
@@ -222,7 +222,7 @@
     justify-content: center;
   }
 
-  /* Mobilde Metni Gizle */
+  /* Mobilde metni gizle */
   .header__link span {
     display: none;
   }
@@ -236,7 +236,7 @@
       color 0.2s ease;
   }
 
-  /* Aktif Link Durumu */
+  /* Aktif link durumu */
   .header__link.active {
     color: #fff;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
@@ -245,4 +245,33 @@
   .header__link:active svg {
     transform: scale(0.85);
   }
+
+  /* Asset detay sayfasında: logo geri ikonunun sağında (solda hizalı) */
+  .header--asset-detail .header__content {
+    justify-content: flex-start;
+  }
+
+  .header--asset-detail .header__back-button {
+    position: static;
+    left: auto;
+  }
+
+  .header--asset-detail .header__logo {
+    position: static;
+    transform: none;
+    margin-left: 8px;
+  }
+
+  /* List detay sayfasında: logo sağa dayalı */
+  .header--list-detail .header__logo {
+    left: auto;
+    right: 16px;
+    transform: none;
+  }
+
+  /* Asset & List detay sayfalarında mobilde sadece logo.svg kalsın */
+  .header--detail-logo-only .header__logo--light {
+    display: none;
+  }
 }
+

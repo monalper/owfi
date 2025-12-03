@@ -1,0 +1,339 @@
+.saved-list-card-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  padding: 20px 24px 12px;
+  border-radius: 18px;
+  background-color: #2b2b2b;
+  color: #f5f5f7;
+  box-sizing: border-box;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, background-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.saved-list-card-root::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 0% 0%,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.03) 25%,
+    transparent 50%
+  );
+  pointer-events: none;
+}
+
+.saved-list-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.saved-list-card-icon-wrapper {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(
+    circle at 20% 0%,
+    rgba(255, 255, 255, 0.2),
+    transparent 55%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.saved-list-card-icon {
+  font-size: 22px;
+}
+
+.saved-list-card-icon-image {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+.saved-list-card-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.saved-list-card-title {
+  font-size: 17px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-list-card-subtitle {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.saved-list-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* ÖZET SAYFA */
+
+.saved-list-card-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.saved-list-card-summary-price {
+  font-size: 32px;
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+}
+
+.saved-list-card-summary-price-main {
+  font-size: 32px;
+}
+
+.saved-list-card-summary-price-decimal {
+  font-size: 0.6em;
+  opacity: 0.7;
+  font-weight: 600;
+}
+
+.saved-list-card-summary-change {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  height: 20px;
+}
+
+.saved-list-card-summary-change-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.saved-list-card-summary-change-value-positive,
+.saved-list-card-summary-change-icon-positive {
+  color: #30d158;
+}
+
+.saved-list-card-summary-change-value-negative,
+.saved-list-card-summary-change-icon-negative {
+  color: #ff6057;
+}
+
+.saved-list-card-summary-change-muted {
+  color: #86868b;
+}
+
+/* HİSSE SATIRLARI */
+
+.saved-list-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  transition: background-color 0.16s ease, border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.saved-list-card-row + .saved-list-card-row {
+  margin-top: 2px;
+}
+
+.saved-list-card-row-positive {
+  border-color: rgba(48, 209, 88, 0.45);
+}
+
+.saved-list-card-row-negative {
+  border-color: rgba(255, 96, 87, 0.45);
+}
+
+.saved-list-card-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.saved-list-card-row-symbol {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.saved-list-card-row-name {
+  font-size: 12px;
+  color: #a1a1a6;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+.saved-list-card-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.saved-list-card-row-price {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff !important;  /* ← fiyat hep beyaz */
+}
+
+/* Yüzde değişim renkleri eskisi gibi çalışır */
+.saved-list-card-row-price-positive,
+.saved-list-card-row-badge-positive {
+  color: #30d158;
+}
+
+.saved-list-card-row-price-negative,
+.saved-list-card-row-badge-negative {
+  color: #ff6057;
+}
+
+/* Yüzde değişim – kutu yok, sadece renkli ikon + metin */
+
+.saved-list-card-row-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #f5f5f7;       /* nötr durumda beyaz */
+  padding: 0;           /* kutu efekti kalksın */
+  border-radius: 0;
+  background: none;
+}
+
+.saved-list-card-row-badge-positive {
+  color: #30d158;       /* yeşil */
+}
+
+.saved-list-card-row-badge-negative {
+  color: #ff6057;       /* kırmızı */
+}
+
+.saved-list-card-row-badge-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.saved-list-card-row-badge-text {
+  line-height: 1;
+}
+
+/* Eski class'lar (başka yerde referans varsa bozulmasın) */
+
+.saved-list-card-row-metrics {
+  display: none;
+}
+
+.saved-list-card-row-change {
+  font-size: 13px;
+}
+
+.saved-list-card-row-change-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* FOOTER & NAV */
+
+.saved-list-card-footer {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.saved-list-card-nav-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: none;
+  background-color: #2b2b2b;
+  color: #f5f5f7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  transition: background-color 0.15s ease, transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.saved-list-card-nav-button:hover:not(:disabled) {
+  background-color: #343437;
+  transform: translateY(-1px);
+}
+
+.saved-list-card-nav-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.saved-list-card-dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saved-list-card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  border: none;
+  background-color: #3a3a3c;
+  padding: 0;
+  cursor: pointer;
+  transition: width 0.16s ease, background-color 0.16s ease;
+}
+
+.saved-list-card-dot-active {
+  width: 10px;
+  background-color: #f5f5f7;
+}
+
+@media (min-width: 768px) {
+  .saved-list-card-root {
+    padding: 20px 24px 14px;
+  }
+
+  .saved-list-card-title {
+    font-size: 18px;
+  }
+
+  .saved-list-card-row-name {
+    max-width: 220px;
+  }
+}

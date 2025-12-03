@@ -30,6 +30,11 @@ function Header() {
 
   const handleLogoClick = () => navigate('/');
   const handleBackClick = () => navigate(-1);
+  const path = location.pathname || '';
+  const isAssetDetailPage = path.startsWith('/asset/');
+  const isListDetailPage = path.startsWith('/lists/');
+  const isSearchPage = path === '/search';
+  const isDetailLogoMinimal = isAssetDetailPage || isListDetailPage;
 
   useEffect(() => {
     const path = location.pathname || '';
@@ -125,7 +130,7 @@ function Header() {
     }
   };
 
-  const isBookmarksPage = location.pathname === '/bookmarks';
+  const isBookmarksPage = path === '/bookmarks';
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -155,8 +160,28 @@ function Header() {
     window.dispatchEvent(new CustomEvent('bookmarks:saveChanges'));
   };
 
+  let logoLeftText = 'openwall';
+  let logoRightText = 'finance';
+
+  if (isSearchPage) {
+    logoLeftText = null;
+    logoRightText = 'Keşfet';
+  } else if (isBookmarksPage) {
+    logoLeftText = null;
+    logoRightText = 'Kaydedilenler';
+  }
+
+  const headerClassNames = [
+    'header',
+    isDetailLogoMinimal ? 'header--detail-logo-only' : '',
+    isAssetDetailPage ? 'header--asset-detail' : '',
+    isListDetailPage ? 'header--list-detail' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <header className="header">
+    <header className={headerClassNames}>
       <div className="header__content">
         <div className="header__left">
           {location.pathname !== '/' && (
@@ -171,9 +196,13 @@ function Header() {
           )}
 
           <button className="header__logo" onClick={handleLogoClick}>
-            <span className="header__logo--light">openwall</span>
+            {logoLeftText && (
+              <span className="header__logo--light">{logoLeftText}</span>
+            )}
             <img src="/logo.svg" alt="logo" className="header__logo-img" />
-            <span className="header__logo--light">finance</span>
+            {logoRightText && (
+              <span className="header__logo--light">{logoRightText}</span>
+            )}
           </button>
         </div>
 
