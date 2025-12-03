@@ -41,6 +41,24 @@
   border-color: #5a5a5c;
 }
 
+/* HEADER'DAKİ KAYDET BUTONU (SİLME MODU İÇİN) */
+.bookmarks-save-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: #0a84ff;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.bookmarks-save-button:hover {
+  background: #0c7ae6;
+}
+
 /* CLEAR ALL BUTTON (POPUP İÇİN DE KULLANILIYOR) */
 .bookmarks-clear-button {
   border: none;
@@ -85,7 +103,7 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* ITEM WRAPPER (TEK TEK SİLME BUTONU İÇİN) */
+/* ITEM WRAPPER (TEK TEK SİLME BUTONU VE BLOKER İÇİN) */
 .bookmarks-item-wrapper {
   position: relative;
   transition: transform 0.15s ease;
@@ -112,6 +130,15 @@
   font-size: 14px;
   cursor: pointer;
   box-shadow: 0 0 0 2px #1c1c1e;
+  z-index: 2; /* kartın ve blocker'ın üstünde */
+}
+
+/* SİLME MODUNDA KARTLARI BLOKLAYAN ŞEFFAF LAYER */
+.bookmarks-item-blocker {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: transparent;
 }
 
 /* SETTINGS POPUP BACKDROP */
@@ -263,24 +290,4 @@
 
 .bookmarks-settings-clear-all:hover {
   background: #48484a;
-}
-
-/* SAĞ ALTA KAYDET FAB BUTONU */
-.bookmarks-save-fab {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 90;
-  border-radius: 999px;
-  border: none;
-  padding: 10px 18px;
-  font-size: 13px;
-  background: #0a84ff;
-  color: #ffffff;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-}
-
-.bookmarks-save-fab:hover {
-  background: #0c7ae6;
 }
