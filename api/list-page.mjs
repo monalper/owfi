@@ -46,13 +46,9 @@ export default async function handler(req, res) {
         const title = `${list.title} | Openwall Finance`;
         const description = `${list.title} listesindeki seçili varlıklar ve piyasa verileri. Piyasaları Openwall Finance'den takip edin.`;
 
-        const nameForImage =
-          title.replace(/\s*\|\s*Openwall Finance\s*$/i, '') ||
-          list.title;
-
-        const ogImageUrl = `https://og-image.vercel.app/${encodeURIComponent(
-          nameForImage,
-        )}.png?theme=dark&md=0&fontSize=64px`;
+        const ogImageUrl = `${protocol}://${host}/api/list-og?id=${encodeURIComponent(
+          listId,
+        )}`;
 
         meta = { title, description, image: ogImageUrl };
       } else {
