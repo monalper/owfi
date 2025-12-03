@@ -43,36 +43,9 @@ export default async function handler(req, res) {
     if (symbol) {
       const baseMeta = await buildAssetMeta(symbol);
 
-      const baseTitle =
-        baseMeta?.title && typeof baseMeta.title === 'string'
-          ? baseMeta.title
-          : DEFAULT_PAGE_TITLE;
-
-      const nameForTitle =
-        baseTitle.replace(/\s*\|\s*Openwall Finance\s*$/i, '') ||
-        String(symbol);
-
-      const hasPrice =
-        typeof baseMeta.price === 'number' &&
-        Number.isFinite(baseMeta.price);
-
-      const hasChangePercent =
-        typeof baseMeta.changePercent === 'number' &&
-        Number.isFinite(baseMeta.changePercent);
-
-      let ogText = nameForTitle;
-
-      if (hasPrice && hasChangePercent) {
-        const priceText = baseMeta.price.toFixed(2);
-        const sign = baseMeta.changePercent >= 0 ? '+' : '';
-        const percentText = `${sign}${baseMeta.changePercent.toFixed(2)}%`;
-
-        ogText = `${nameForTitle}\\n${priceText} (${percentText})`;
-      }
-
-      const ogImageUrl = `https://og-image.vercel.app/${encodeURIComponent(
-        ogText,
-      )}.png?theme=dark&md=1&fontSize=72px`;
+      const ogImageUrl = `${protocol}://${host}/api/asset-og?symbol=${encodeURIComponent(
+        symbol,
+      )}`;
 
       meta = {
         ...baseMeta,
