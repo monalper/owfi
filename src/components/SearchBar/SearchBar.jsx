@@ -22,7 +22,6 @@ function SearchBar({ autoFocus = false }) {
 
   return (
     <form className="searchbar-root" onSubmit={handleSubmit}>
-      <FaSearch className="searchbar-icon" size={14} />
       <input
         className="searchbar-input"
         placeholder="Hisse, fon, döviz ara"
@@ -30,12 +29,11 @@ function SearchBar({ autoFocus = false }) {
         onChange={(event) => setValue(event.target.value)}
         autoFocus={autoFocus}
       />
-      <button type="submit" className="searchbar-submit">
-        Ara
+      <button type="submit" className="searchbar-submit" aria-label="Ara">
+        <FaSearch className="searchbar-icon" size={14} />
       </button>
     </form>
   );
 }
 
 export default SearchBar;
-
