@@ -16,32 +16,41 @@
   position: absolute;
   top: -10000px;
   left: -10000px;
-  width: 320px;
+  width: 320px;              /* İstersen burada da küçültebilirsin (örn: 300px) */
   background-color: #1d1d1f;
-  border-radius: 18px 18px 0 0;
   overflow: hidden;
   pointer-events: none;
 }
 
+/* Sadece export PNG icin kullanilan AssetCard alt kose yuvarlakliklarini sifirla */
+.asset-detail-export-card .asset-card-root,
+.asset-detail-export-card .asset-card-skeleton-root {
+  border-radius: 18px 18px 0 0;
+}
+
+/* BANNER: yatay hizalama + daha ince görünüm */
 .asset-detail-export-banner {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;       /* ÖNEMLİ: yan yana */
   align-items: center;
   justify-content: center;
-  padding: 16px 20px 12px;
-  gap: 8px;
+  padding: 8px 12px;         /* Öncekinden daha az */
+  gap: 6px;                  /* Elemanlar arası boşluk küçüldü */
   background-color: #1d1d1f;
 }
 
+/* Logo daha küçük */
 .asset-detail-export-logo {
-  width: 40px;
+  width: 16px;               /* 40 -> 28 */
   height: auto;
   display: block;
 }
 
+/* Metin küçüldü + satır kırılmasın */
 .asset-detail-export-text {
-  font-size: 14px;
-  color: #f5f5f7;
+  font-size: 12px;           /* 14 -> 12 */
+  color: #f5f5f7/85;
+  white-space: nowrap;       /* ASLA alt satıra geçmesin */
 }
 
 .asset-detail-export-text-strong {

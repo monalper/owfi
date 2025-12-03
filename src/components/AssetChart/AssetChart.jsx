@@ -8,17 +8,19 @@ import {
   Tooltip,
   ReferenceLine,
 } from 'recharts';
+import { SkeletonBlock, SkeletonLine } from '../Skeleton/Skeleton.jsx';
 import './AssetChart.css';
 
 export function AssetChartSkeleton() {
   return (
     <div className="asset-chart-root">
-      <div className="asset-chart-skeleton">
-        <div className="asset-chart-skeleton-inner">
-          <div className="asset-chart-skeleton-header" />
-          <div className="asset-chart-skeleton-chart">
-            <div className="asset-chart-skeleton-shimmer" />
-          </div>
+      <div className="asset-chart-skeleton-card">
+        <div className="asset-chart-skeleton-header-row">
+          <SkeletonLine className="asset-chart-skeleton-title" />
+          <SkeletonLine className="asset-chart-skeleton-subtitle" />
+        </div>
+        <div className="asset-chart-skeleton-chart-area">
+          <SkeletonBlock className="asset-chart-skeleton-chart-block" />
         </div>
       </div>
     </div>

@@ -2,12 +2,42 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TbArrowUpRight, TbArrowDownLeft } from 'react-icons/tb';
 import CardChart from '../CardChart/CardChart.jsx';
+import { SkeletonLine, SkeletonBlock, SkeletonPill } from '../Skeleton/Skeleton.jsx';
 import './AssetCard.css';
 
 const formatterNumber = new Intl.NumberFormat('tr-TR', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+
+export function AssetCardSkeleton() {
+  return (
+    <div className="asset-card-skeleton-root">
+      <div className="asset-card-skeleton-inner">
+        <div className="asset-card-skeleton-header">
+          <SkeletonLine className="asset-card-skeleton-symbol" />
+          <SkeletonLine className="asset-card-skeleton-name" />
+        </div>
+
+        <div className="asset-card-skeleton-body">
+          <SkeletonBlock className="asset-card-skeleton-price" />
+          <div className="asset-card-skeleton-change-row">
+            <SkeletonPill className="asset-card-skeleton-change-pill" />
+            <SkeletonLine className="asset-card-skeleton-change-text" />
+          </div>
+        </div>
+      </div>
+
+      <div className="asset-card-chart-container">
+        <div className="asset-card-chart-placeholder">
+          <div className="asset-card-chart-placeholder-inner skeleton-chart-inner">
+            <SkeletonBlock className="asset-card-chart-placeholder-line" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function AssetCard({
   symbol,
@@ -18,17 +48,27 @@ function AssetCard({
   changePercent,
   chartData,
 }) {
-  const isPositive = typeof change === 'number' && change >= 0;
-  const isNegative = typeof change === 'number' && change < 0;
+  const hasName = Boolean(symbol && (longName || shortName));
+  const hasPrice = typeof regularMarketPrice === 'number';
+  const hasChange = typeof change === 'number';
+  const hasChangePercent = typeof changePercent === 'number';
+  const hasChartData = Array.isArray(chartData) && chartData.length > 0;
+  const isCardReady =
+    hasName && hasPrice && hasChange && hasChangePercent && hasChartData;
+
+  if (!isCardReady) {
+    return <AssetCardSkeleton />;
+  }
+
+  const isPositive = change >= 0;
+  const isNegative = change < 0;
 
   const upperSymbol = (symbol || '').toUpperCase();
   let displaySymbol = upperSymbol.replace(/\.IS$/i, '');
 
-  // Döviz pariteleri için özel gösterim
   if (upperSymbol === 'USDTRY=X') displaySymbol = 'USD/TRY';
   else if (upperSymbol === 'EURTRY=X') displaySymbol = 'EUR/TRY';
   else if (upperSymbol === 'EURUSD=X') displaySymbol = 'EUR/USD';
-  // Kıymetli madenler için özel gösterim
   else if (upperSymbol === 'GC=F') displaySymbol = 'Altın';
   else if (upperSymbol === 'SI=F') displaySymbol = 'Gümüş';
 
@@ -45,20 +85,12 @@ function AssetCard({
   if (isTurkeyIndex) currencySymbol = '₺';
   else if (isUsd) currencySymbol = '$';
 
-  const textChangePercent =
-    typeof changePercent === 'number'
-      ? formatterNumber.format(Math.abs(changePercent))
-      : null;
+  const textChangePercent = formatterNumber.format(Math.abs(changePercent));
 
-  let priceMain = '?';
-  let priceDecimal = null;
-
-  if (typeof regularMarketPrice === 'number') {
-    const formatted = formatterNumber.format(regularMarketPrice);
-    const parts = formatted.split(',');
-    priceMain = parts[0];
-    if (parts.length > 1) priceDecimal = parts[1];
-  }
+  const formattedPrice = formatterNumber.format(regularMarketPrice);
+  const priceParts = formattedPrice.split(',');
+  const priceMain = priceParts[0];
+  const priceDecimal = priceParts.length > 1 ? priceParts[1] : null;
 
   return (
     <Link to={`/asset/${encodeURIComponent(symbol)}`} className="asset-card-root">
@@ -104,15 +136,11 @@ function AssetCard({
       </div>
 
       <div className="asset-card-chart-container">
-        {Array.isArray(chartData) && chartData.length > 0 ? (
-          <CardChart
-            data={chartData}
-            color={isPositive ? '#30d158' : isNegative ? '#ff453a' : '#888'}
-            chartId={symbol}
-          />
-        ) : (
-          <div className="chart-placeholder" />
-        )}
+        <CardChart
+          data={chartData}
+          color={isPositive ? '#30d158' : isNegative ? '#ff453a' : '#888888'}
+          chartId={symbol}
+        />
       </div>
     </Link>
   );

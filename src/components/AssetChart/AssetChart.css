@@ -12,60 +12,44 @@
   font-size: 14px;
 }
 
-.asset-chart-skeleton {
+.asset-chart-skeleton-card {
   width: 100%;
   height: 220px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #252525 0%, #2b2b2b 40%, #252525 100%);
-  overflow: hidden;
-  position: relative;
-}
-
-.asset-chart-skeleton-inner {
-  position: absolute;
-  inset: 0;
-  padding: 10px 8px 8px;
+  background: #252525;
+  padding: 12px 10px 10px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.asset-chart-skeleton-header {
+.asset-chart-skeleton-header-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.asset-chart-skeleton-title {
+  width: 45%;
   height: 12px;
-  width: 60%;
-  border-radius: 999px;
-  background: #333333;
 }
 
-.asset-chart-skeleton-chart {
+.asset-chart-skeleton-subtitle {
+  width: 30%;
+  height: 10px;
+}
+
+.asset-chart-skeleton-chart-area {
   flex: 1;
+  display: flex;
+  align-items: stretch;
+}
+
+.asset-chart-skeleton-chart-block {
+  width: 100%;
+  height: 100%;
   border-radius: 14px;
-  background: #262626;
-  position: relative;
-  overflow: hidden;
-}
-
-.asset-chart-skeleton-shimmer {
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.04) 20%,
-    rgba(255, 255, 255, 0.06) 40%,
-    rgba(255, 255, 255, 0) 60%
-  );
-  animation: asset-chart-skeleton-shimmer 1.4s ease-in-out infinite;
-}
-
-@keyframes asset-chart-skeleton-shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
 }
 
 /* Custom Tooltip Stilleri */
