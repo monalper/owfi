@@ -337,3 +337,45 @@
     max-width: 220px;
   }
 }
+
+/* Sayfa container'ı animasyon için */
+.saved-list-card-body {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Her sayfa */
+.saved-list-card-page {
+  width: 100%;
+}
+
+/* Yumuşak slide + fade animasyonları */
+@keyframes saved-list-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes saved-list-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.saved-list-card-page-enter-from-right {
+  animation: saved-list-slide-in-right 0.22s ease-out;
+}
+
+.saved-list-card-page-enter-from-left {
+  animation: saved-list-slide-in-left 0.22s ease-out;
+}

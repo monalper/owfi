@@ -87,6 +87,7 @@ function computeAggregateMetrics(symbols, quotesBySymbol) {
 function SavedListCard({ list, quotesBySymbol, pageSize = 7 }) {
   const navigate = useNavigate();
   const [pageIndex, setPageIndex] = useState(0);
+  const [pageDirection, setPageDirection] = useState('next'); // 'next' | 'prev'
 
   const symbols = Array.isArray(list.symbols) ? list.symbols : [];
 
@@ -121,6 +122,16 @@ function SavedListCard({ list, quotesBySymbol, pageSize = 7 }) {
   const swipeLockRef = useRef(false);
   const minSwipeDistance = 60; // px
 
+  const goPrevPage = () => {
+    setPageDirection('prev');
+    setPageIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const goNextPage = () => {
+    setPageDirection('next');
+    setPageIndex((prev) => Math.min(prev + 1, totalPages - 1));
+  };
+
   const handleCardClick = () => {
     // Eğer bu tap'ten hemen önce bir swipe ile sayfa değiştiysek, navigate etme
     if (swipeLockRef.current) {
@@ -132,16 +143,21 @@ function SavedListCard({ list, quotesBySymbol, pageSize = 7 }) {
 
   const handlePrev = (event) => {
     event.stopPropagation();
-    setPageIndex((prev) => Math.max(prev - 1, 0));
+    if (pageIndex === 0) return;
+    goPrevPage();
   };
 
   const handleNext = (event) => {
     event.stopPropagation();
-    setPageIndex((prev) => Math.min(prev + 1, totalPages - 1));
+    if (pageIndex === totalPages - 1) return;
+    goNextPage();
   };
 
   const handleDotClick = (event, index) => {
     event.stopPropagation();
+    if (index === pageIndex) return;
+
+    setPageDirection(index > pageIndex ? 'next' : 'prev');
     setPageIndex(index);
   };
 
@@ -163,7 +179,6 @@ function SavedListCard({ list, quotesBySymbol, pageSize = 7 }) {
     const endX = event.changedTouches[0].clientX;
     const distance = endX - touchStartXRef.current;
 
-    // swipe yoksa
     if (Math.abs(distance) < minSwipeDistance) {
       return;
     }
@@ -171,16 +186,177 @@ function SavedListCard({ list, quotesBySymbol, pageSize = 7 }) {
     // swipe var → click ile navigate olmasın
     swipeLockRef.current = true;
 
-    if (distance < 0) {
+    if (distance < 0 && pageIndex < totalPages - 1) {
       // sola kaydır → sonraki sayfa
-      setPageIndex((prev) => Math.min(prev + 1, totalPages - 1));
-    } else if (distance > 0) {
+      goNextPage();
+    } else if (distance > 0 && pageIndex > 0) {
       // sağa kaydır → önceki sayfa
-      setPageIndex((prev) => Math.max(prev - 1, 0));
+      goPrevPage();
     }
   };
 
   const marketLabel = getMarketLabel(list.market);
+
+  // Sayfa içeriğini tek yerde topluyoruz (animasyon için)
+  const renderPageContent = () => {
+    if (pageIndex === 0) {
+      return (
+        <div className="saved-list-card-summary">
+          <div className="saved-list-card-summary-price">
+            {aggregate.hasData ? (
+              (() => {
+                const formatted = priceFormatter.format(aggregate.totalPrice);
+                const [main, decimal] = formatted.split(',');
+                return (
+                  <>
+                    <span className="saved-list-card-summary-price-main">
+                      {main}
+                    </span>
+                    {decimal && (
+                      <span className="saved-list-card-summary-price-decimal">
+                        ,{decimal}
+                      </span>
+                    )}
+                  </>
+                );
+              })()
+            ) : (
+              <span className="saved-list-card-summary-price-main">--</span>
+            )}
+          </div>
+          <div className="saved-list-card-summary-change">
+            {aggregate.hasData &&
+            typeof aggregate.totalChange === 'number' ? (
+              <>
+                {isPositive && (
+                  <TbArrowUpRight className="saved-list-card-summary-change-icon saved-list-card-summary-change-icon-positive" />
+                )}
+                {isNegative && (
+                  <TbArrowDownLeft className="saved-list-card-summary-change-icon saved-list-card-summary-change-icon-negative" />
+                )}
+                <span
+                  className={`saved-list-card-summary-change-value${
+                    isPositive
+                      ? ' saved-list-card-summary-change-value-positive'
+                      : isNegative
+                      ? ' saved-list-card-summary-change-value-negative'
+                      : ''
+                  }`}
+                >
+                  {priceFormatter.format(Math.abs(aggregate.totalChange))}
+                </span>
+                {typeof aggregate.totalChangePercent === 'number' && (
+                  <span
+                    className={`saved-list-card-summary-change-percent${
+                      isPositive
+                        ? ' saved-list-card-summary-change-value-positive'
+                        : isNegative
+                        ? ' saved-list-card-summary-change-value-negative'
+                        : ''
+                    }`}
+                  >
+                    %{percentFormatter.format(
+                      Math.abs(aggregate.totalChangePercent),
+                    )}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="saved-list-card-summary-change-muted">--</span>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Satır sayfaları
+    return currentPageSymbols.map((symbol) => {
+      const quote = quotesBySymbol[symbol];
+      const price = quote?.regularMarketPrice;
+      const changePercent = quote?.regularMarketChangePercent;
+
+      const rowPositive =
+        typeof changePercent === 'number' && changePercent > 0;
+      const rowNegative =
+        typeof changePercent === 'number' && changePercent < 0;
+
+      const formattedPrice =
+        typeof price === 'number' ? priceFormatter.format(price) : '--';
+
+      const formattedChange =
+        typeof changePercent === 'number'
+          ? `${changePercent >= 0 ? '+' : '-'}${percentFormatter.format(
+              Math.abs(changePercent),
+            )}%`
+          : '--';
+
+      const hasAnyData =
+        typeof price === 'number' || typeof changePercent === 'number';
+
+      return (
+        <div
+          key={symbol}
+          className={`saved-list-card-row${
+            rowPositive
+              ? ' saved-list-card-row-positive'
+              : rowNegative
+              ? ' saved-list-card-row-negative'
+              : ''
+          }`}
+        >
+          <div className="saved-list-card-row-left">
+            <div className="saved-list-card-row-symbol">
+              {getDisplaySymbol(symbol)}
+            </div>
+            {quote?.shortName && (
+              <div className="saved-list-card-row-name">
+                {quote.shortName}
+              </div>
+            )}
+          </div>
+
+          <div className="saved-list-card-row-right">
+            <span
+              className={`saved-list-card-row-price${
+                rowPositive
+                  ? ' saved-list-card-row-price-positive'
+                  : rowNegative
+                  ? ' saved-list-card-row-price-negative'
+                  : ''
+              }`}
+            >
+              {formattedPrice}
+            </span>
+
+            <div
+              className={`saved-list-card-row-badge${
+                rowPositive
+                  ? ' saved-list-card-row-badge-positive'
+                  : rowNegative
+                  ? ' saved-list-card-row-badge-negative'
+                  : ''
+              }`}
+            >
+              {rowPositive && (
+                <TbArrowUpRight className="saved-list-card-row-badge-icon" />
+              )}
+              {rowNegative && (
+                <TbArrowDownLeft className="saved-list-card-row-badge-icon" />
+              )}
+              <span className="saved-list-card-row-badge-text">
+                {hasAnyData ? formattedChange : 'Veri yok'}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    });
+  };
+
+  const pageAnimationClass =
+    pageDirection === 'next'
+      ? 'saved-list-card-page-enter-from-right'
+      : 'saved-list-card-page-enter-from-left';
 
   return (
     <div
@@ -219,157 +395,12 @@ function SavedListCard({ list, quotesBySymbol, pageSize = 7 }) {
       </header>
 
       <div className="saved-list-card-body">
-        {pageIndex === 0 && (
-          <div className="saved-list-card-summary">
-            <div className="saved-list-card-summary-price">
-              {aggregate.hasData ? (
-                (() => {
-                  const formatted = priceFormatter.format(aggregate.totalPrice);
-                  const [main, decimal] = formatted.split(',');
-                  return (
-                    <>
-                      <span className="saved-list-card-summary-price-main">
-                        {main}
-                      </span>
-                      {decimal && (
-                        <span className="saved-list-card-summary-price-decimal">
-                          ,{decimal}
-                        </span>
-                      )}
-                    </>
-                  );
-                })()
-              ) : (
-                <span className="saved-list-card-summary-price-main">--</span>
-              )}
-            </div>
-            <div className="saved-list-card-summary-change">
-              {aggregate.hasData &&
-              typeof aggregate.totalChange === 'number' ? (
-                <>
-                  {isPositive && (
-                    <TbArrowUpRight className="saved-list-card-summary-change-icon saved-list-card-summary-change-icon-positive" />
-                  )}
-                  {isNegative && (
-                    <TbArrowDownLeft className="saved-list-card-summary-change-icon saved-list-card-summary-change-icon-negative" />
-                  )}
-                  <span
-                    className={`saved-list-card-summary-change-value${
-                      isPositive
-                        ? ' saved-list-card-summary-change-value-positive'
-                        : isNegative
-                        ? ' saved-list-card-summary-change-value-negative'
-                        : ''
-                    }`}
-                  >
-                    {priceFormatter.format(Math.abs(aggregate.totalChange))}
-                  </span>
-                  {typeof aggregate.totalChangePercent === 'number' && (
-                    <span
-                      className={`saved-list-card-summary-change-percent${
-                        isPositive
-                          ? ' saved-list-card-summary-change-value-positive'
-                          : isNegative
-                          ? ' saved-list-card-summary-change-value-negative'
-                          : ''
-                      }`}
-                    >
-                      %{percentFormatter.format(
-                        Math.abs(aggregate.totalChangePercent),
-                      )}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="saved-list-card-summary-change-muted">--</span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {pageIndex > 0 &&
-          currentPageSymbols.map((symbol) => {
-            const quote = quotesBySymbol[symbol];
-            const price = quote?.regularMarketPrice;
-            const changePercent = quote?.regularMarketChangePercent;
-
-            const rowPositive =
-              typeof changePercent === 'number' && changePercent > 0;
-            const rowNegative =
-              typeof changePercent === 'number' && changePercent < 0;
-
-            const formattedPrice =
-              typeof price === 'number' ? priceFormatter.format(price) : '--';
-
-            const formattedChange =
-              typeof changePercent === 'number'
-                ? `${changePercent >= 0 ? '+' : '-'}${percentFormatter.format(
-                    Math.abs(changePercent),
-                  )}%`
-                : '--';
-
-            const hasAnyData =
-              typeof price === 'number' ||
-              typeof changePercent === 'number';
-
-            return (
-              <div
-                key={symbol}
-                className={`saved-list-card-row${
-                  rowPositive
-                    ? ' saved-list-card-row-positive'
-                    : rowNegative
-                    ? ' saved-list-card-row-negative'
-                    : ''
-                }`}
-              >
-                <div className="saved-list-card-row-left">
-                  <div className="saved-list-card-row-symbol">
-                    {getDisplaySymbol(symbol)}
-                  </div>
-                  {quote?.shortName && (
-                    <div className="saved-list-card-row-name">
-                      {quote.shortName}
-                    </div>
-                  )}
-                </div>
-
-                <div className="saved-list-card-row-right">
-                  <span
-                    className={`saved-list-card-row-price${
-                      rowPositive
-                        ? ' saved-list-card-row-price-positive'
-                        : rowNegative
-                        ? ' saved-list-card-row-price-negative'
-                        : ''
-                    }`}
-                  >
-                    {formattedPrice}
-                  </span>
-
-                  <div
-                    className={`saved-list-card-row-badge${
-                      rowPositive
-                        ? ' saved-list-card-row-badge-positive'
-                        : rowNegative
-                        ? ' saved-list-card-row-badge-negative'
-                        : ''
-                    }`}
-                  >
-                    {rowPositive && (
-                      <TbArrowUpRight className="saved-list-card-row-badge-icon" />
-                    )}
-                    {rowNegative && (
-                      <TbArrowDownLeft className="saved-list-card-row-badge-icon" />
-                    )}
-                    <span className="saved-list-card-row-badge-text">
-                      {hasAnyData ? formattedChange : 'Veri yok'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div
+          key={pageIndex}
+          className={`saved-list-card-page ${pageAnimationClass}`}
+        >
+          {renderPageContent()}
+        </div>
       </div>
 
       {totalPages > 1 && (

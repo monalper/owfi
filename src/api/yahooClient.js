@@ -2,6 +2,7 @@ const CACHE_TTL_MS = 60 * 1000;
 const API_BASE = '/api/yahoo';
 
 const cache = new Map();
+const inFlightRequests = new Map();
 
 // Aralık ayarlarını biraz daha hassaslaştırdık (Örn: 1G için 2m)
 const RANGE_PARAMS = {
@@ -49,6 +50,29 @@ async function fetchWithCache(url) {
   return data;
 }
 
+async function fetchWithCacheDedup(url) {
+  const now = Date.now();
+  const cached = cache.get(url);
+
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const inFlight = inFlightRequests.get(url);
+  if (inFlight) {
+    return inFlight;
+  }
+
+  const fetchPromise = fetchWithCache(url);
+  inFlightRequests.set(url, fetchPromise);
+
+  try {
+    return await fetchPromise;
+  } finally {
+    inFlightRequests.delete(url);
+  }
+}
+
 export async function fetchQuotes(symbols) {
   const cleanSymbols = symbols.filter(Boolean);
   const results = await Promise.all(
@@ -57,7 +81,7 @@ export async function fetchQuotes(symbols) {
         const url = `${API_BASE}/v8/finance/chart/${encodeURIComponent(
           symbol,
         )}?range=1d&interval=1d&lang=tr-TR&region=TR`;
-        const json = await fetchWithCache(url);
+        const json = await fetchWithCacheDedup(url);
         const chartResult = json?.chart?.result?.[0];
 
         if (!chartResult) return null;
@@ -119,7 +143,7 @@ export async function fetchChart(symbol, rangeKey) {
     symbol,
   )}?range=${params.range}&interval=${params.interval}&lang=tr-TR&region=TR`;
 
-  const json = await fetchWithCache(url);
+  const json = await fetchWithCacheDedup(url);
   const result = json?.chart?.result?.[0];
 
   if (!result) {
@@ -199,7 +223,7 @@ export async function fetchRangeStats(symbol, rangeKey) {
     symbol,
   )}&range=${params.range}&interval=${params.interval}&lang=tr-TR&region=TR`;
 
-  const json = await fetchWithCache(url);
+  const json = await fetchWithCacheDedup(url);
 
   if (!json || typeof json !== 'object') {
     return null;
@@ -256,7 +280,7 @@ export async function searchSymbols(query, { limit = 100 } = {}) {
     trimmed,
   )}&lang=tr-TR&region=TR&quotesCount=${safeLimit}&newsCount=0`;
 
-  const json = await fetchWithCache(url);
+  const json = await fetchWithCacheDedup(url);
   const quotes = Array.isArray(json?.quotes) ? json.quotes : [];
 
   if (!quotes.length) {
@@ -298,7 +322,7 @@ export async function fetchCompanyProfile(symbol) {
     symbol,
   )}&lang=tr-TR&region=TR&quotesCount=1&newsCount=0`;
 
-  const json = await fetchWithCache(url);
+  const json = await fetchWithCacheDedup(url);
   const quote = json?.quotes?.[0];
 
   if (!quote) {
@@ -327,7 +351,7 @@ export async function fetchCompanyNews(symbol, { count = 6 } = {}) {
     symbol,
   )}&lang=en-US&region=US&quotesCount=0&newsCount=${safeCount}`;
 
-  const json = await fetchWithCache(url);
+  const json = await fetchWithCacheDedup(url);
   const items = Array.isArray(json?.news) ? json.news : [];
 
   const upperSymbol = String(symbol).toUpperCase();
