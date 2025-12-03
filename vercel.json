@@ -5,8 +5,12 @@
       "destination": "https://query1.finance.yahoo.com/:path*"
     },
     {
-      "source": "/asset/:path*",
-      "destination": "/"
+      "source": "/asset/:symbol",
+      "destination": "/api/asset-page?symbol=:symbol"
+    },
+    {
+      "source": "/lists/:id",
+      "destination": "/api/list-page?id=:id"
     },
     {
       "source": "/search",
