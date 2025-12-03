@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1596" height="1596" viewBox="0 0 1596 1596">
   <defs>
-    <linearGradient id="linear-gradient" x1="1" y1="1" x2="0" gradientUnits="objectBoundingBox">
-      <stop offset="0" stop-color="#1d1d1f"/>
+    <linearGradient id="linear-gradient" x1="2.599" y1="2.358" x2="-0.446" y2="-0.437" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="blue"/>
       <stop offset="1" stop-color="#414141"/>
     </linearGradient>
     <clipPath id="clip-vite">
