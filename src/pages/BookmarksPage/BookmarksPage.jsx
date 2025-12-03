@@ -6,7 +6,7 @@ import {
   setBookmarkedSymbols,
 } from '../../utils/bookmarksStorage.js';
 
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa6';
+import { IoMdSettings } from 'react-icons/io';
 
 import './BookmarksPage.css';
 
@@ -18,7 +18,8 @@ function BookmarksPage() {
   const [error, setError] = useState(null);
 
   const [layoutType, setLayoutType] = useState('grid'); // grid | compact | list
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     const initial = getBookmarkedSymbols();
@@ -46,7 +47,9 @@ function BookmarksPage() {
 
         const bySymbol = {};
         result.forEach((item) => {
-          if (item?.symbol) bySymbol[item.symbol] = item;
+          if (item?.symbol) {
+            bySymbol[item.symbol] = item;
+          }
         });
         setQuotes(bySymbol);
 
@@ -58,7 +61,7 @@ function BookmarksPage() {
             } catch {
               return [symbol, []];
             }
-          })
+          }),
         );
 
         if (cancelled) return;
@@ -73,11 +76,14 @@ function BookmarksPage() {
           setError(err.message || 'Kaydedilenler yüklenirken hata oluştu.');
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     load();
+
     return () => {
       cancelled = true;
     };
@@ -86,79 +92,47 @@ function BookmarksPage() {
   const handleClearAll = () => {
     setBookmarkedSymbols([]);
     setSymbols([]);
+    setDeleteMode(false);
+  };
+
+  const handleDeleteSymbol = (symbol) => {
+    const updated = symbols.filter((s) => s !== symbol);
+    setBookmarkedSymbols(updated);
+    setSymbols(updated);
   };
 
   const orderedSymbols = useMemo(
     () => symbols.slice().sort((a, b) => a.localeCompare(b)),
-    [symbols]
+    [symbols],
   );
 
-  const toggleDropdown = () => setDropdownOpen((x) => !x);
+  const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
 
-  const selectLayout = (type) => {
-    setLayoutType(type);
-    setDropdownOpen(false);
+  const openSettings = () => setIsSettingsOpen(true);
+  const closeSettings = () => setIsSettingsOpen(false);
+
+  const handleToggleDeleteMode = () => {
+    setDeleteMode((prev) => !prev);
   };
 
-  const listClassName = `bookmarks-list bookmarks-list--${layoutType}`;
+  const handleSelectLayout = (type) => {
+    setLayoutType(type);
+  };
 
   return (
     <div className="bookmarks-root">
       <header className="bookmarks-header">
         <h1 className="bookmarks-title">Kaydedilenler</h1>
 
-        {symbols.length > 0 && (
-          <div className="bookmarks-actions">
-
-            {/* CUSTOM DROPDOWN */}
-            <div className="bookmarks-dropdown-wrapper">
-              <button
-                type="button"
-                className="bookmarks-dropdown-button"
-                onClick={toggleDropdown}
-              >
-                {layoutType === 'grid' && 'Grid'}
-                {layoutType === 'compact' && 'Sıkı Grid'}
-                {layoutType === 'list' && 'Liste'}
-
-                <span className="bookmarks-dropdown-icon">
-                  {dropdownOpen ? <FaArrowUp /> : <FaArrowDown />}
-                </span>
-              </button>
-
-              {dropdownOpen && (
-                <div className="bookmarks-dropdown-menu">
-                  <div
-                    className="bookmarks-dropdown-item"
-                    onClick={() => selectLayout('grid')}
-                  >
-                    Grid
-                  </div>
-                  <div
-                    className="bookmarks-dropdown-item"
-                    onClick={() => selectLayout('compact')}
-                  >
-                    Sıkı Grid
-                  </div>
-                  <div
-                    className="bookmarks-dropdown-item"
-                    onClick={() => selectLayout('list')}
-                  >
-                    Liste
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button
-              type="button"
-              className="bookmarks-clear-button"
-              onClick={handleClearAll}
-            >
-              Tümünü temizle
-            </button>
-          </div>
-        )}
+        <div className="bookmarks-actions">
+          <button
+            type="button"
+            className="bookmarks-settings-button"
+            onClick={openSettings}
+          >
+            <IoMdSettings />
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -175,19 +149,131 @@ function BookmarksPage() {
 
       {!loading && symbols.length > 0 && (
         <section className={listClassName}>
-          {orderedSymbols.map((symbol) => (
-            <AssetCard
-              key={symbol}
-              symbol={symbol}
-              longName={quotes[symbol]?.longName}
-              shortName={quotes[symbol]?.shortName}
-              regularMarketPrice={quotes[symbol]?.regularMarketPrice}
-              change={quotes[symbol]?.regularMarketChange}
-              changePercent={quotes[symbol]?.regularMarketChangePercent}
-              chartData={charts[symbol]}
-            />
-          ))}
+          {orderedSymbols.map((symbol) => {
+            const quote = quotes[symbol];
+            const chartData = charts[symbol];
+
+            return (
+              <div
+                key={symbol}
+                className={`bookmarks-item-wrapper${
+                  deleteMode ? ' bookmarks-item-wrapper--deleting' : ''
+                }`}
+              >
+                {deleteMode && (
+                  <button
+                    type="button"
+                    className="bookmarks-item-delete-button"
+                    onClick={() => handleDeleteSymbol(symbol)}
+                  >
+                    ×
+                  </button>
+                )}
+                <AssetCard
+                  symbol={symbol}
+                  longName={quote?.longName}
+                  shortName={quote?.shortName}
+                  regularMarketPrice={quote?.regularMarketPrice}
+                  change={quote?.regularMarketChange}
+                  changePercent={quote?.regularMarketChangePercent}
+                  chartData={chartData}
+                />
+              </div>
+            );
+          })}
         </section>
+      )}
+
+      {/* SETTINGS POPUP */}
+      {isSettingsOpen && (
+        <div
+          className="bookmarks-settings-backdrop"
+          onClick={closeSettings}
+        >
+          <div
+            className="bookmarks-settings-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bookmarks-settings-header">
+              <h2 className="bookmarks-settings-title">
+                Kaydedilenler ayarları
+              </h2>
+              <button
+                type="button"
+                className="bookmarks-settings-close"
+                onClick={closeSettings}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="bookmarks-settings-section">
+              <div className="bookmarks-settings-section-title">
+                Görünüm
+              </div>
+              <div className="bookmarks-settings-layout-options">
+                <button
+                  type="button"
+                  className={`bookmarks-settings-layout-button${
+                    layoutType === 'grid'
+                      ? ' bookmarks-settings-layout-button--active'
+                      : ''
+                  }`}
+                  onClick={() => handleSelectLayout('grid')}
+                >
+                  Grid
+                </button>
+                <button
+                  type="button"
+                  className={`bookmarks-settings-layout-button${
+                    layoutType === 'compact'
+                      ? ' bookmarks-settings-layout-button--active'
+                      : ''
+                  }`}
+                  onClick={() => handleSelectLayout('compact')}
+                >
+                  Sıkı Grid
+                </button>
+                <button
+                  type="button"
+                  className={`bookmarks-settings-layout-button${
+                    layoutType === 'list'
+                      ? ' bookmarks-settings-layout-button--active'
+                      : ''
+                  }`}
+                  onClick={() => handleSelectLayout('list')}
+                >
+                  Liste
+                </button>
+              </div>
+            </div>
+
+            <div className="bookmarks-settings-section">
+              <div className="bookmarks-settings-section-title">
+                Silme
+              </div>
+              <div className="bookmarks-settings-row">
+                <label className="bookmarks-toggle">
+                  <input
+                    type="checkbox"
+                    checked={deleteMode}
+                    onChange={handleToggleDeleteMode}
+                  />
+                  <span className="bookmarks-toggle-slider" />
+                  <span>Tek tek silme modunu aç</span>
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="bookmarks-settings-clear-all"
+                onClick={handleClearAll}
+              >
+                Tümünü sil
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
