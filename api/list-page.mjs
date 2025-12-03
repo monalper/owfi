@@ -36,7 +36,6 @@ export default async function handler(req, res) {
     let meta = {
       title: DEFAULT_PAGE_TITLE,
       description: DEFAULT_DESCRIPTION,
-      image: undefined,
     };
 
     if (listId) {
@@ -44,12 +43,9 @@ export default async function handler(req, res) {
 
       if (list) {
         const title = `${list.title} | Openwall Finance`;
-        const description = `${list.title} listesindeki seçili varlıklar ve piyasa verileri. Piyasaları Openwall Finance'dan takip edin.`;
-        const imageUrl = `${protocol}://${host}/api/list-og?id=${encodeURIComponent(
-          listId,
-        )}`;
+        const description = `${list.title} listesindeki seçili varlıklar ve piyasa verileri. Piyasaları Openwall Finance'den takip edin.`;
 
-        meta = { title, description, image: imageUrl };
+        meta = { title, description };
       } else {
         meta = {
           title: 'Listeler | Openwall Finance',
