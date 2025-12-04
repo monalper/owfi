@@ -26,3 +26,14 @@
     padding: 24px 24px 40px;
   }
 }
+
+::selection 
+{
+   background-color: #4cd964;
+   color : #1d1d1f
+}
+::-moz-selection
+{
+   background-color: #4cd964;
+   color : #1d1d1f
+}
