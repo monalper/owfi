@@ -371,13 +371,14 @@
 .asset-detail-news {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .asset-detail-news-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px 0 6px;
 }
 
 .asset-detail-news-title {
