@@ -14,11 +14,13 @@ import {
   fetchCompanyProfile,
   fetchCompanyNews,
   fetchRecommendations,
+  fetchComparisonChange,
 } from '../../api/yahooClient.js';
 import { FaYahoo } from 'react-icons/fa';
 import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
 import AssetChart from '../../components/AssetChart/AssetChart.jsx';
 import AssetCard from '../../components/AssetCard/AssetCard.jsx';
+import AssetComparison from '../../components/AssetComparison/AssetComparison.jsx';
 import TimeRangeToggle from '../../components/TimeRangeToggle/TimeRangeToggle.jsx';
 import NewsCard from '../../components/NewsCard/NewsCard.jsx';
 import {
@@ -37,6 +39,13 @@ const percentFormatter = new Intl.NumberFormat('tr-TR', {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+
+const COMPARISON_RANGES = [
+  { key: '1A', label: '1 Ay' },
+  { key: '3A', label: '3 Ay' },
+  { key: '1Y', label: '1 Yıl' },
+  { key: '3Y', label: '3 Yıl' },
+];
 
 function RelatedAssetsSection({ symbol }) {
   const [relatedSymbols, setRelatedSymbols] = useState([]);
@@ -205,7 +214,7 @@ function RelatedAssetsSection({ symbol }) {
   return (
     <section className="asset-detail-related">
       <div className="asset-detail-related-header">
-        <h2 className="asset-detail-related-title">People Also Watch</h2>
+        <h2 className="asset-detail-related-title">Benzer Varlıklar</h2>
       </div>
       <div className="asset-detail-related-list">
         {relatedSymbols.map((relatedSymbol) => {
@@ -252,6 +261,9 @@ function AssetDetailPage() {
   const [loadingQuote, setLoadingQuote] = useState(true);
   const [loadingChart, setLoadingChart] = useState(true);
   const [error, setError] = useState(null);
+  const [comparisonRows, setComparisonRows] = useState([]);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonError, setComparisonError] = useState(null);
 
   const [companyProfile, setCompanyProfile] = useState(null);
   const [companyProfileLoading, setCompanyProfileLoading] = useState(false);
@@ -831,6 +843,11 @@ function AssetDetailPage() {
           </div>
         )}
       </section>
+
+      <AssetComparison
+        symbol={symbol}
+        primaryName={quote?.longName || quote?.shortName}
+      />
 
       {(companyNewsLoading || (companyNews && companyNews.length > 0)) && (
         <section className="asset-detail-news">

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './TimeRangeToggle.css';
 
-const OPTIONS = [
+const DEFAULT_OPTIONS = [
   { key: '1G', label: '1G' },
   { key: '1H', label: '1H' },
   { key: '1A', label: '1A' },
@@ -12,9 +12,11 @@ const OPTIONS = [
   { key: 'MAX', label: 'MAX' },
 ];
 
-function TimeRangeToggle({ value, onChange }) {
+function TimeRangeToggle({ value, onChange, options, compact = false }) {
   const [gliderStyle, setGliderStyle] = useState({ left: 0, width: 0 });
   const itemsRef = useRef({});
+  const items =
+    Array.isArray(options) && options.length > 0 ? options : DEFAULT_OPTIONS;
 
   // Seçili eleman değiştiğinde veya ekran boyutu değiştiğinde çalışır
   useEffect(() => {
@@ -25,10 +27,14 @@ function TimeRangeToggle({ value, onChange }) {
         width: activeElement.offsetWidth
       });
     }
-  }, [value]);
+  }, [value, items]);
+
+  const rootClassName = compact
+    ? 'time-toggle-root time-toggle-root--compact'
+    : 'time-toggle-root';
 
   return (
-    <div className="time-toggle-root">
+    <div className={rootClassName}>
       {/* Kayan arka plan parçası */}
       <div 
         className="time-toggle-glider"
@@ -38,7 +44,7 @@ function TimeRangeToggle({ value, onChange }) {
         }}
       />
 
-      {OPTIONS.map((option) => (
+      {items.map((option) => (
         <button
           key={option.key}
           ref={(el) => (itemsRef.current[option.key] = el)}

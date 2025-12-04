@@ -467,3 +467,72 @@ export async function fetchCompanyNews(symbol, { count = 6 } = {}) {
     type: item.type,
   }));
 }
+
+const COMPARISON_RANGE_CONFIG = {
+  '1A': { range: '1mo', interval: '1d' },
+  '3A': { range: '3mo', interval: '1wk' },
+  YTD: { range: 'ytd', interval: '1d' },
+  '1Y': { range: '1y', interval: '1wk' },
+  '3Y': { range: '3y', interval: '1wk' },
+};
+
+export async function fetchComparisonChange(symbol, rangeKey) {
+  const trimmed = String(symbol ?? '').trim();
+  if (!trimmed || !rangeKey) {
+    return null;
+  }
+
+  const config = COMPARISON_RANGE_CONFIG[rangeKey];
+  if (!config) {
+    return null;
+  }
+
+  const url = `${API_BASE}/v8/finance/spark?symbols=${encodeURIComponent(
+    trimmed,
+  )}&range=${encodeURIComponent(config.range)}&interval=${encodeURIComponent(
+    config.interval,
+  )}&lang=tr-TR&region=TR`;
+
+  const json = await fetchWithCacheDedup(url);
+
+  if (!json || typeof json !== 'object') {
+    return null;
+  }
+
+  let series = json[trimmed];
+
+  if (!series) {
+    const upper = trimmed.toUpperCase();
+    series = json[upper];
+  }
+
+  if (!series) {
+    const values = Object.values(json);
+    series = values[0];
+  }
+
+  if (!series || !Array.isArray(series.close) || series.close.length === 0) {
+    return null;
+  }
+
+  const closes = series.close;
+
+  const firstClose = closes.find((value) => typeof value === 'number');
+  const lastClose = [...closes]
+    .reverse()
+    .find((value) => typeof value === 'number');
+
+  if (typeof firstClose !== 'number' || typeof lastClose !== 'number') {
+    return null;
+  }
+
+  const change = lastClose - firstClose;
+  const changePercent =
+    firstClose !== 0 ? (change / firstClose) * 100 : 0;
+
+  return {
+    lastPrice: lastClose,
+    change,
+    changePercent,
+  };
+}

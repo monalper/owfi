@@ -1,7 +1,7 @@
 .asset-detail-root {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
   position: relative;
 }
 
@@ -200,13 +200,15 @@
 .asset-detail-metrics {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  margin-top: 8px;
 }
 
 .asset-detail-metrics-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px 0 6px;
 }
 
 .asset-detail-metrics-title {
@@ -456,13 +458,15 @@
 .asset-detail-related {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+  margin-top: 8px;
 }
-
+  
 .asset-detail-related-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 4px 0 6px;
 }
 
 .asset-detail-related-title {
@@ -489,6 +493,197 @@
   margin-top: 6px;
   font-size: 13px;
   color: #e3e3e3;
+}
+
+/* COMPARISON */
+.asset-detail-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.asset-detail-comparison-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.asset-detail-comparison-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.asset-detail-comparison-ranges {
+  display: flex;
+  border-radius: 999px;
+  background-color: #2b2b2b;
+  padding: 3px;
+  gap: 4px;
+}
+
+.asset-detail-comparison-range {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #f5f5f7;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.asset-detail-comparison-range--active {
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  transform: translateY(-1px);
+}
+
+.asset-detail-comparison-range:active {
+  transform: translateY(0);
+}
+
+.asset-detail-comparison-list {
+  border-radius: 16px;
+  background-color: #1d1d1f;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.asset-detail-comparison-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.asset-detail-comparison-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 140px;
+  max-width: 140px;
+}
+
+.asset-detail-comparison-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+.asset-detail-comparison-icon--self {
+  color: inherit;
+}
+
+.asset-detail-comparison-icon--gold,
+.asset-detail-comparison-icon--silver,
+.asset-detail-comparison-icon--usdtry,
+.asset-detail-comparison-icon--bist100 {
+  color: inherit;
+}
+
+.asset-detail-comparison-icon-image {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
+.asset-detail-comparison-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.asset-detail-comparison-asset-label {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.asset-detail-comparison-asset-symbol {
+  font-size: 11px;
+  color: #e3e3e3;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.asset-detail-comparison-asset-name {
+  font-size: 11px;
+  color: #e3e3e3;
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.asset-detail-comparison-center {
+  flex: 1;
+}
+
+.asset-detail-comparison-bar-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #262626;
+  overflow: hidden;
+}
+
+.asset-detail-comparison-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  width: 0;
+  transition: width 0.25s ease-out;
+}
+
+.asset-detail-comparison-bar-fill--primary {
+  background-color: #4d8dff;
+}
+
+.asset-detail-comparison-bar-fill--accent {
+  background-color: #30d158;
+}
+
+.asset-detail-comparison-bar-fill--negative {
+  background-color: #FF6057;
+}
+
+.asset-detail-comparison-right {
+  flex: 0 0 auto;
+  min-width: 72px;
+  text-align: right;
+}
+
+.asset-detail-comparison-value-text {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.asset-detail-comparison-value-text--positive {
+  color: #30d158;
+}
+
+.asset-detail-comparison-value-text--negative {
+  color: #FF6057;
 }
 
 @media (min-width: 768px) {
