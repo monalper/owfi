@@ -86,12 +86,15 @@
   font-size: 20px;
   color: #fff;
   padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .header__logo-img {
   height: 18px;
   width: auto;
   display: block;
+  -webkit-user-drag: none;
 }
 
 .header__logo--light {
@@ -274,4 +277,3 @@
     display: none;
   }
 }
-

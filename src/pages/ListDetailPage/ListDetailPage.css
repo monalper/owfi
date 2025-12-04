@@ -45,6 +45,9 @@
   height: 26px;
   object-fit: contain;
   display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .list-detail-header-text {

@@ -267,6 +267,89 @@ export async function fetchRangeStats(symbol, rangeKey) {
   };
 }
 
+export async function fetchRecommendations(symbol, { limit = 12 } = {}) {
+  const trimmed = String(symbol ?? '').trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const safeLimit =
+    Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 12;
+
+  const url = `${API_BASE}/v6/finance/recommendationsbysymbol/${encodeURIComponent(
+    trimmed,
+  )}`;
+
+  const json = await fetchWithCacheDedup(url);
+
+  const items =
+    json?.finance?.result?.[0]?.recommendedSymbols;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return [];
+  }
+
+  const upperOriginal = trimmed.toUpperCase();
+  const seen = new Set();
+  const symbols = [];
+
+  items.forEach((item) => {
+    const raw = item && item.symbol;
+    if (!raw) return;
+
+    const value = String(raw).trim();
+    const upper = value.toUpperCase();
+
+    if (!upper || upper === upperOriginal) return;
+    if (seen.has(upper)) return;
+
+    seen.add(upper);
+    symbols.push(value);
+  });
+
+  return symbols.slice(0, safeLimit);
+}
+
+export async function fetchScreenerQuotes({
+  scrId,
+  region = 'US',
+  count = 20,
+} = {}) {
+  if (!scrId) {
+    throw new Error('Screener kimliYi (scrId) gerekli.');
+  }
+
+  const safeCount =
+    Number.isFinite(count) && count > 0 ? Math.min(count, 250) : 20;
+
+  const url = `${API_BASE}/v1/finance/screener/predefined/saved?scrIds=${encodeURIComponent(
+    scrId,
+  )}&count=${safeCount}&region=${encodeURIComponent(region)}`;
+
+  const json = await fetchWithCacheDedup(url);
+  const quotes = json?.finance?.result?.[0]?.quotes;
+
+  if (!Array.isArray(quotes) || quotes.length === 0) {
+    return [];
+  }
+
+  return quotes
+    .map((item) => ({
+      symbol: item.symbol,
+      longName: item.longName || item.shortName || item.displayName,
+      shortName: item.shortName || item.longName || item.displayName,
+      regularMarketPrice: item.regularMarketPrice,
+      regularMarketChange: item.regularMarketChange,
+      regularMarketChangePercent: item.regularMarketChangePercent,
+    }))
+    .filter(
+      (item) =>
+        item.symbol &&
+        typeof item.regularMarketPrice === 'number' &&
+        typeof item.regularMarketChangePercent === 'number',
+    );
+}
+
 export async function searchSymbols(query, { limit = 100 } = {}) {
   const trimmed = String(query ?? '').trim();
   if (!trimmed) {

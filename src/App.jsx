@@ -16,6 +16,9 @@ const ListDetailPage = React.lazy(
 const BookmarksPage = React.lazy(
   () => import('./pages/BookmarksPage/BookmarksPage.jsx'),
 );
+const AboutPage = React.lazy(
+  () => import('./pages/AboutPage/AboutPage.jsx'),
+);
 const NotFoundPage = React.lazy(
   () => import('./pages/NotFoundPage/NotFoundPage.jsx'),
 );
@@ -32,6 +35,7 @@ function App() {
             <Route path="/search" element={<SearchResultsPage />} />
             <Route path="/lists/:listId" element={<ListDetailPage />} />
             <Route path="/bookmarks" element={<BookmarksPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </React.Suspense>

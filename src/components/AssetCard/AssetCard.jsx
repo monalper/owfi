@@ -2,7 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { TbArrowUpRight, TbArrowDownLeft } from 'react-icons/tb';
 import CardChart from '../CardChart/CardChart.jsx';
-import { SkeletonLine, SkeletonBlock, SkeletonPill } from '../Skeleton/Skeleton.jsx';
+import {
+  SkeletonLine,
+  SkeletonBlock,
+  SkeletonPill,
+} from '../Skeleton/Skeleton.jsx';
 import './AssetCard.css';
 
 const formatterNumber = new Intl.NumberFormat('tr-TR', {
@@ -53,6 +57,7 @@ function AssetCard({
   const hasChange = typeof change === 'number';
   const hasChangePercent = typeof changePercent === 'number';
   const hasChartData = Array.isArray(chartData) && chartData.length > 0;
+
   const isCardReady =
     hasName && hasPrice && hasChange && hasChangePercent && hasChartData;
 
@@ -71,14 +76,17 @@ function AssetCard({
   else if (upperSymbol === 'EURUSD=X') displaySymbol = 'EUR/USD';
   else if (upperSymbol === 'GC=F') displaySymbol = 'Altın';
   else if (upperSymbol === 'SI=F') displaySymbol = 'Gümüş';
+  else if (upperSymbol === 'PL=F') displaySymbol = 'Platin';
 
-  const isTurkeyIndex = upperSymbol.includes('.IS') || upperSymbol.startsWith('XU');
+  const isTurkeyIndex =
+    upperSymbol.includes('.IS') || upperSymbol.startsWith('XU');
 
   const isUsd =
     upperSymbol === 'SPY' ||
     upperSymbol === 'QQQ' ||
     upperSymbol === 'GC=F' ||
     upperSymbol === 'SI=F' ||
+    upperSymbol === 'PL=F' ||
     (!upperSymbol.includes('.IS') && !upperSymbol.includes('=X'));
 
   let currencySymbol = '';
@@ -93,7 +101,10 @@ function AssetCard({
   const priceDecimal = priceParts.length > 1 ? priceParts[1] : null;
 
   return (
-    <Link to={`/asset/${encodeURIComponent(symbol)}`} className="asset-card-root">
+    <Link
+      to={`/asset/${encodeURIComponent(symbol)}`}
+      className="asset-card-root"
+    >
       <div className="asset-card-content-wrapper">
         <div className="asset-card-header">
           <div className="asset-card-symbol">{displaySymbol}</div>
@@ -147,3 +158,4 @@ function AssetCard({
 }
 
 export default AssetCard;
+

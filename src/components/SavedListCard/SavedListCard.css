@@ -60,6 +60,9 @@
   height: 22px;
   object-fit: contain;
   display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .saved-list-card-header-text {

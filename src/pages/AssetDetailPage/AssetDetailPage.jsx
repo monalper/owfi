@@ -13,6 +13,7 @@ import {
   fetchRangeStats,
   fetchCompanyProfile,
   fetchCompanyNews,
+  fetchRecommendations,
 } from '../../api/yahooClient.js';
 import { FaYahoo } from 'react-icons/fa';
 import { WATCHLIST_GROUPS } from '../../config/watchlists.js';
@@ -38,48 +39,103 @@ const percentFormatter = new Intl.NumberFormat('tr-TR', {
 });
 
 function RelatedAssetsSection({ symbol }) {
+  const [relatedSymbols, setRelatedSymbols] = useState([]);
   const [quotesBySymbol, setQuotesBySymbol] = useState({});
   const [chartsBySymbol, setChartsBySymbol] = useState({});
   const [loading, setLoading] = useState(false);
 
-  const relatedSymbols = useMemo(() => {
-    if (!symbol) return [];
+  useEffect(() => {
+    let cancelled = false;
 
-    const upper = symbol.toUpperCase();
+    async function resolveRelatedSymbols() {
+      if (!symbol) {
+        setRelatedSymbols([]);
+        return;
+      }
 
-    const directGroup = WATCHLIST_GROUPS.find((group) =>
-      group.symbols.some((s) => s.toUpperCase() === upper),
-    );
+      const upper = symbol.toUpperCase();
 
-    if (directGroup) {
-      return directGroup.symbols.filter((s) => s.toUpperCase() !== upper);
+      try {
+        const recommended = await fetchRecommendations(symbol, {
+          limit: 12,
+        });
+
+        if (cancelled) return;
+
+        const unique = [];
+        const seen = new Set();
+
+        recommended.forEach((itemSymbol) => {
+          const raw = String(itemSymbol || '').trim();
+          const up = raw.toUpperCase();
+
+          if (!raw || !up || up === upper || seen.has(up)) return;
+
+          seen.add(up);
+          unique.push(raw);
+        });
+
+        if (unique.length > 0) {
+          setRelatedSymbols(unique);
+          return;
+        }
+      } catch {
+        // Devam edip fallback'e gec
+      }
+
+      const directGroup = WATCHLIST_GROUPS.find((group) =>
+        group.symbols.some((s) => s.toUpperCase() === upper),
+      );
+
+      if (directGroup) {
+        const symbols = directGroup.symbols.filter(
+          (s) => s.toUpperCase() !== upper,
+        );
+        setRelatedSymbols(symbols);
+        return;
+      }
+
+      const isBist = upper.endsWith('.IS') || upper.startsWith('XU');
+      const isFx =
+        upper.includes('=X') && upper !== 'GC=F' && upper !== 'SI=F';
+      const isCommodity =
+        upper === 'GC=F' ||
+        upper === 'SI=F' ||
+        upper === 'XAUUSD=X' ||
+        upper === 'XAGUSD=X';
+      const isUs = !isBist && !isFx && !isCommodity;
+
+      let fallbackId = null;
+      if (isBist) fallbackId = 'equities';
+      else if (isFx) fallbackId = 'fx';
+      else if (isCommodity) fallbackId = 'commodities';
+      else if (isUs) fallbackId = 'us-companies';
+
+      if (!fallbackId) {
+        setRelatedSymbols([]);
+        return;
+      }
+
+      const fallbackGroup = WATCHLIST_GROUPS.find(
+        (group) => group.id === fallbackId,
+      );
+
+      if (!fallbackGroup) {
+        setRelatedSymbols([]);
+        return;
+      }
+
+      const symbols = fallbackGroup.symbols.filter(
+        (s) => s.toUpperCase() !== upper,
+      );
+      setRelatedSymbols(symbols);
     }
 
-    const isBist = upper.endsWith('.IS') || upper.startsWith('XU');
-    const isFx =
-      upper.includes('=X') && upper !== 'GC=F' && upper !== 'SI=F';
-    const isCommodity =
-      upper === 'GC=F' ||
-      upper === 'SI=F' ||
-      upper === 'XAUUSD=X' ||
-      upper === 'XAGUSD=X';
-    const isUs = !isBist && !isFx && !isCommodity;
+    resolveRelatedSymbols();
 
-    let fallbackId = null;
-    if (isBist) fallbackId = 'equities';
-    else if (isFx) fallbackId = 'fx';
-    else if (isCommodity) fallbackId = 'commodities';
-    else if (isUs) fallbackId = 'us-companies';
-
-    if (!fallbackId) return [];
-
-    const fallbackGroup = WATCHLIST_GROUPS.find(
-      (group) => group.id === fallbackId,
-    );
-
-    if (!fallbackGroup) return [];
-
-    return fallbackGroup.symbols.filter((s) => s.toUpperCase() !== upper);
+    return () => {
+      cancelled = true;
+    };
   }, [symbol]);
 
   useEffect(() => {
@@ -149,7 +205,7 @@ function RelatedAssetsSection({ symbol }) {
   return (
     <section className="asset-detail-related">
       <div className="asset-detail-related-header">
-        <h2 className="asset-detail-related-title" />
+        <h2 className="asset-detail-related-title">People Also Watch</h2>
       </div>
       <div className="asset-detail-related-list">
         {relatedSymbols.map((relatedSymbol) => {

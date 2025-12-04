@@ -3,7 +3,7 @@ export const WATCHLIST_GROUPS = [
     id: 'funds',
     title: '',
     description: '',
-    symbols: ['XU500.IS', 'XU100.IS', 'XU050.IS', 'XU030.IS', 'SPY', 'QQQ'],
+    symbols: ['XU030.IS', 'XU050.IS', 'XU100.IS', 'XU500.IS', 'SPY', 'QQQ'],
   },
   {
     id: 'equities',
@@ -23,11 +23,12 @@ export const WATCHLIST_GROUPS = [
     description: '',
     symbols: ['USDTRY=X', 'EURTRY=X', 'EURUSD=X'],
   },
-
   {
     id: 'commodities',
     title: 'Kıymetli Madenler',
     description: '',
-    symbols: ['GC=F', 'SI=F'], // XAUUSD=X yerine GC=F, XAGUSD=X yerine SI=F
+    // Altın, Gümüş, Platin vadeli kontratları
+    symbols: ['GC=F', 'SI=F', 'PL=F'],
   },
 ];
+
