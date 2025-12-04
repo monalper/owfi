@@ -138,7 +138,7 @@ export const PRESET_LISTS = [
   // Ek BIST listeleri (daha detayli ve tematik)
 {
   id: 'bist100-endeksi-hisseleri',
-  title: 'BIST100 BIST100 Endeksi Hisseleri',
+  title: 'BIST100 Endeksi Hisseleri',
   emoji: '📈',
   iconImage: '/listicon/bist100endekshis.png',
   description: 'BIST100 endeksindeki tüm hisseleri takip edin.',
