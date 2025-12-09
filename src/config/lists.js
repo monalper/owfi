@@ -42,26 +42,24 @@ export const PRESET_LISTS = [
     ],
   },
   
-  {
-    id: 'tly-içindekiler',
-    title: 'TLY Fonu Hisseleri',
-    emoji: '😎',
-    iconImage: '/listicon/tlyicindekiler.png',
-    description: 'TLY Fonunda yer aldığı bilinen tüm hisseler.',
-    market: 'bist',
-    symbols: [
-      'TEHOL.IS',
-      'TERA.IS',
-      'TRHOL.IS',
-      'DSTKF.IS',
-      'TURSG.IS',
-      'SMRVA.IS',
-      'HEDEF.IS',
-      'PEKGY.IS',
-      'GRTHO.IS',
-      'ADESE.IS'
-    ],
-  },
+{
+  id: 'tly-içindekiler',
+  title: 'TLY Fonu Hisseleri',
+  emoji: '😎',
+  iconImage: '/listicon/tlyicindekiler.png',
+  description: '@KolinBorsa',
+  market: 'bist',
+  symbols: [
+    'RALYH.IS',
+    'SMRVA.IS',
+    'DSTKF.IS',
+    'TERA.IS',
+    'TEHOL.IS',
+    'TRHOL.IS',
+    'PEKGY.IS'
+  ],
+},
+
 
   {
     id: 'altini-yenen-hisseler',
