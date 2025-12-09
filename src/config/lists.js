@@ -56,7 +56,8 @@ export const PRESET_LISTS = [
     'TERA.IS',
     'TEHOL.IS',
     'TRHOL.IS',
-    'PEKGY.IS'
+    'PEKGY.IS',
+    'TURSG.IS'
   ],
 },
 
